@@ -27,11 +27,11 @@ Put the features of a video file called face.mp4 on another video file called he
     facetool swap -i face.mp4 -t head.mp4 -o swap.mp4
 
 ### Utility commands
-Convert a movie file to a set of JPG files (used for video swapping)
+Convert a movie file called `movie.mp4` to a set of JPG files in a directory called `frames` (used for video swapping)
 
     facetool extractframes -i movie.mp4 -o frames
 
-Convert a set of JPG files to a movie file (used for video swapping)
+Convert a set of JPG files from the directory `frames` to a movie file called `movie.mp4` (used for video swapping)
 
     facetool combineframes -i frames -o movie.mp4
 

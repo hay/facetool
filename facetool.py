@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-from facetool import media, swap
+from facetool import media, Faceswap, DEFAULT_FRAMERATE
 import argparse
 import logging
 import json
 import os
 
-DEFAULT_FRAMERATE = 30
 COMMANDS = ("swap", "extractframes", "combineframes", "probe")
 logger = logging.getLogger(__name__)
 
@@ -15,6 +14,7 @@ parser.add_argument("-i", "--input", type = str, required = True)
 parser.add_argument("-o", "--output", type = str)
 parser.add_argument("-t", "--target", type = str)
 parser.add_argument("-f", "--framerate", type = str, default = DEFAULT_FRAMERATE)
+parser.add_argument('-pp', '--predictor-path', type = str, default = "./data/landmarks.dat")
 parser.add_argument("-v", "--verbose", action="store_true")
 args = parser.parse_args()
 
@@ -35,5 +35,8 @@ elif args.command == "probe":
     data = media.probe(args.input)
     jsondata = json.dumps(data, indent = 4)
     print(jsondata)
+elif args.command == "swap":
+    swapper = Faceswap(predictor_path = args.predictor_path)
+    swapper.swap(args.target, args.input, args.output)
 else:
     parser.print_help()

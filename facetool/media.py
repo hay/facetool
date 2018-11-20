@@ -1,4 +1,5 @@
 from glob import glob
+from .constants import DEFAULT_FRAMERATE
 import ffmpeg
 import os
 import logging
@@ -25,7 +26,7 @@ Does something like this:
 ffmpeg -r 24.89 -f image2 -s 480x360 -i "video-in/%04d.jpg" -vcodec libx264 -crf 25 -pix_fmt yuv420p movie.mp4
 
 """
-def combineframes(inp, out, framerate):
+def combineframes(inp, out, framerate = DEFAULT_FRAMERATE):
     if os.path.isdir(inp):
         path = f"{inp}/%04d.jpg"
 
@@ -50,6 +51,14 @@ def extractframes(inp, out):
     output = f"{out}/%{FRAME_FILENAME_LENGTH}d.jpg"
     cmd = ffmpeg.input(inp).output(output, **{"q:v" : 2})
     _run(cmd)
+
+def is_image(inp):
+    data = probe(inp)
+    return data["format"]["format_name"] == "image2"
+
+# FIXME: this is obviously pretty ugly
+def is_video(inp):
+    return not is_image(inp)
 
 def probe(inp = None):
     return ffmpeg.probe(inp)

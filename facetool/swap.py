@@ -41,8 +41,13 @@ import cv2
 import dlib
 import numpy
 import sys
+import os
 import argparse
 import logging
+from glob import glob
+
+from .media import is_image, is_video, extractframes, combineframes
+from .util import force_mkdir, get_basename, numberize_files
 
 logger = logging.getLogger(__name__)
 
@@ -90,13 +95,10 @@ class NoFaces(Exception):
 
 
 class Faceswap:
-    def __init__(self, predictor_path, verbose = False):
+    def __init__(self, predictor_path):
         self.predictor_path = predictor_path
         self.detector = dlib.get_frontal_face_detector()
         self.predictor = dlib.shape_predictor(self.predictor_path)
-
-        if verbose:
-            logging.basicConfig(level=logging.DEBUG)
 
     def _get_landmarks(self, im):
         rects = self.detector(im, 1)
@@ -211,7 +213,7 @@ class Faceswap:
         return (im2.astype(numpy.float64) * im1_blur.astype(numpy.float64) /
                                                     im2_blur.astype(numpy.float64))
 
-    def faceswap(self, head, face, output):
+    def _faceswap(self, head, face, output):
         logger.debug(f"Faceswap {head} to {face} as {output}")
 
         im1, landmarks1 = self._read_im_and_landmarks(head)
@@ -231,3 +233,36 @@ class Faceswap:
         output_im = im1 * (1.0 - combined_mask) + warped_corrected_im2 * combined_mask
 
         cv2.imwrite(output, output_im)
+
+    def faceswap(self, head, face, out):
+        logger.debug(f"Processing {head} -> {face}")
+
+        try:
+            self._faceswap(head = head, face = face, output = out)
+        except Exception as e:
+            # raise(e)
+            logger.debug(e)
+            logger.error("Couldn't convert this face")
+
+    def swap(self, head, face, out):
+        if not os.path.isfile(head):
+            raise Exception(f"'{head}' is not a file")
+        elif not os.path.isfile(face):
+            raise Exception(f"'{face}' is not a file")
+        elif is_video(head) and is_image(face):
+            """
+            [force_mkdir(p) for p in ("head-tmp", "out-tmp")]
+            extractframes(head, "head-tmp")
+
+            for path in glob("head-tmp/*"):
+                outpath = "out-tmp/" + get_basename(path) + ".jpg"
+                self.faceswap(path, face, outpath)
+
+            numberize_files("out-tmp")
+            """
+            combineframes("out-tmp", out)
+            # [shutil.rmtree(p) for p in ("head-tmp", "out-tmp")]
+        elif is_image(head) and is_image(face):
+            self.faceswap(head, face, out)
+        else:
+            print("nope")
