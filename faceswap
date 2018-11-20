@@ -69,6 +69,6 @@ elif isdir(args.head):
         outpath = get_outpath(path)
         swap(path, args.face, outpath)
 elif args.head and args.face:
-    swap(args.head, args.face, args.outpath)
+    swap(args.head, args.face, args.output)
 else:
     parser.print_help()
