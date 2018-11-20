@@ -1,5 +1,5 @@
 # facetool
-> Command line utility to manipulate faces in images, written in Python 3
+> Command line utility to manipulate faces in videos and images, written in Python 3
 
 This library and command line tool is mostly a wrapper around well-known libraries and algorithms like `ffmpeg`, `dlib`, `opencv` and `face_recognition`.
 
