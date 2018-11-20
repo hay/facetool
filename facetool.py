@@ -9,15 +9,21 @@ COMMANDS = ("swap", "extractframes", "combineframes", "probe")
 logger = logging.getLogger(__name__)
 
 parser = argparse.ArgumentParser(description = "Manipulate faces in videos and images")
+
+# Essentials
 parser.add_argument("command", choices = COMMANDS, nargs = "?")
 parser.add_argument("-i", "--input", type = str, required = True)
 parser.add_argument("-o", "--output", type = str)
 parser.add_argument("-t", "--target", type = str)
+
+# Extra arguments
 parser.add_argument("-f", "--framerate", type = str, default = DEFAULT_FRAMERATE)
+parser.add_argument("-kt", "--keep-temp", action = "store_true", help = "Keep temporary files (used with video swapping")
 parser.add_argument("-pp", "--predictor-path", type = str, default = "./data/landmarks.dat")
 parser.add_argument("-s", "--swap", action = "store_true", help = "Swap input and target")
 parser.add_argument("-v", "--verbose", action = "store_true")
 parser.add_argument("-vv", "--extra-verbose", action = "store_true")
+
 args = parser.parse_args()
 
 if args.verbose or args.extra_verbose:
@@ -41,7 +47,11 @@ elif args.command == "probe":
     jsondata = json.dumps(data, indent = 4)
     print(jsondata)
 elif args.command == "swap":
-    swapper = Swapper(args.predictor_path, raise_exceptions = args.extra_verbose)
+    swapper = Swapper(
+        args.predictor_path,
+        raise_exceptions = args.extra_verbose,
+        keep_temp = args.keep_temp
+    )
 
     if not os.path.isfile(args.input):
         raise Exception(f"'{args.input}' is not a file")

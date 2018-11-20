@@ -15,9 +15,10 @@ IMG_TO_VIDEO = (HEAD_TMP, OUT_TMP)
 VIDEO_TO_VIDEO = (HEAD_TMP, OUT_TMP, FACE_TMP)
 
 class Swapper:
-    def __init__(self, predictor_path, raise_exceptions = False):
+    def __init__(self, predictor_path, raise_exceptions = False, keep_temp = False):
         self.predictor_path = predictor_path
         self.raise_exceptions = raise_exceptions
+        self.keep_temp = keep_temp
         self.swap = Faceswap(self.predictor_path)
 
     def _faceswap(self, head, face, out):
@@ -45,7 +46,9 @@ class Swapper:
 
         numberize_files(OUT_TMP)
         combineframes(OUT_TMP, out)
-        [shutil.rmtree(p) for p in IMG_TO_VIDEO]
+
+        if not self.keep_temp:
+            [shutil.rmtree(p) for p in IMG_TO_VIDEO]
 
     def swap_video_to_video(self, head, face, out):
         [force_mkdir(p) for p in VIDEO_TO_VIDEO]
@@ -71,4 +74,6 @@ class Swapper:
 
         numberize_files(OUT_TMP)
         combineframes(OUT_TMP, out)
-        [shutil.rmtree(p) for p in VIDEO_TO_VIDEO]
+
+        if not self.keep_temp:
+            [shutil.rmtree(p) for p in VIDEO_TO_VIDEO]
