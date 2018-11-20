@@ -1,6 +1,5 @@
 __pycache__
 test
-out.jpg
-video.mp4
-video-in
-video-out
+*.mp4
+*.jpg
+video-*
