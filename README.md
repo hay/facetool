@@ -38,3 +38,34 @@ Convert a set of JPG files from the directory `frames` to a movie file called `m
 Return metadata about an image or video file in JSON format
 
     facetool probe -i movie.mp4
+
+## All options
+
+    usage: facetool.py [-h] -i INPUT [-o OUTPUT] [-t TARGET] [-f FRAMERATE]
+                       [-pp PREDICTOR_PATH] [-s] [-v] [-vv]
+                       [{swap,extractframes,combineframes,probe}]
+
+    positional arguments:
+      {swap,extractframes,combineframes,probe}
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      -i INPUT, --input INPUT
+      -o OUTPUT, --output OUTPUT
+      -t TARGET, --target TARGET
+      -f FRAMERATE, --framerate FRAMERATE
+      -pp PREDICTOR_PATH, --predictor-path PREDICTOR_PATH
+      -s, --swap            Swap input and target
+      -v, --verbose
+      -vv, --extra-verbose
+
+## Credits
+Written by [Hay Kranen](https://www.haykranen.nl).
+
+### Faceswapping
+Faceswapping algorithm by [Matthew Earl](http://matthewearl.github.io/2015/07/28/switching-eds-with-python/), licensed under the MIT license.
+
+Copyright (c) 2015 Matthew Earl
+
+## License
+Licensed under the [MIT license](https://opensource.org/licenses/MIT).
