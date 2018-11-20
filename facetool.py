@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from facetool import media, Faceswap, DEFAULT_FRAMERATE
+from facetool import media, Swapper, DEFAULT_FRAMERATE
 import argparse
 import logging
 import json
@@ -14,14 +14,19 @@ parser.add_argument("-i", "--input", type = str, required = True)
 parser.add_argument("-o", "--output", type = str)
 parser.add_argument("-t", "--target", type = str)
 parser.add_argument("-f", "--framerate", type = str, default = DEFAULT_FRAMERATE)
-parser.add_argument('-pp', '--predictor-path', type = str, default = "./data/landmarks.dat")
-parser.add_argument("-v", "--verbose", action="store_true")
+parser.add_argument("-pp", "--predictor-path", type = str, default = "./data/landmarks.dat")
+parser.add_argument("-s", "--swap", action = "store_true", help = "Swap input and target")
+parser.add_argument("-v", "--verbose", action = "store_true")
+parser.add_argument("-vv", "--extra-verbose", action = "store_true")
 args = parser.parse_args()
 
-if args.verbose:
+if args.verbose or args.extra_verbose:
     logging.basicConfig(level=logging.DEBUG)
 
 logging.debug(args)
+
+if args.swap:
+    args.input, args.target = args.target, args.input
 
 if args.command == "extractframes":
     if not os.path.isdir(args.output):
@@ -36,7 +41,19 @@ elif args.command == "probe":
     jsondata = json.dumps(data, indent = 4)
     print(jsondata)
 elif args.command == "swap":
-    swapper = Faceswap(predictor_path = args.predictor_path)
-    swapper.swap(args.target, args.input, args.output)
+    swapper = Swapper(args.predictor_path, raise_exceptions = args.extra_verbose)
+
+    if not os.path.isfile(args.input):
+        raise Exception(f"'{args.input}' is not a file")
+    elif not os.path.isfile(args.target):
+        raise Exception(f"'{args.target}' is not a file")
+    elif media.is_video(args.target) and media.is_image(args.input):
+        swapper.swap_image_to_video(args.target, args.input, args.output)
+    elif media.is_video(args.target) and media.is_video(args.input):
+        swapper.swap_video_to_video(args.target, args.input, args.output)
+    elif media.is_image(args.target) and media.is_image(args.input):
+        swapper.swap_image_to_image(args.target, args.input, args.output)
+    else:
+        raise Exception("Invalid swap options")
 else:
     parser.print_help()
