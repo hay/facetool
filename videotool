@@ -2,31 +2,36 @@
 from lib.videotool import Videotool
 from glob import glob
 from os.path import splitext, basename
-import sys
 import argparse
+import json
 import logging
+import sys
 
+DEFAULT_FRAMERATE = 30
 logger = logging.getLogger(__name__)
 
 parser = argparse.ArgumentParser(description = "Handy video utilities")
-parser.add_argument(
-    'action',
-    choices = ("extractframes", "combineframes"),
-    required = True
-)
-parser.add_argument('-i', '--input', type = str)
-parser.add_argument('-o', '--output', type = str)
+parser.add_argument('action', choices = ("extractframes", "combineframes", "probe"), nargs = "?")
+parser.add_argument('input', type = str, nargs = "?")
+parser.add_argument("-f", "--framerate", type = str, default = DEFAULT_FRAMERATE)
+parser.add_argument('-o', '--output', type = str, required = True)
 parser.add_argument('-v', '--verbose', action="store_true")
 args = parser.parse_args()
 
 if args.verbose:
     logging.basicConfig(level=logging.DEBUG)
 
-tool = Videotool(inp = args.input, out = args.output)
+logging.debug(args)
+
+tool = Videotool(inp = args.input, out = args.output, framerate = args.framerate)
 
 if args.action == "extractframes":
     tool.extractframes()
 elif args.action == "combineframes":
     tool.combineframes()
+elif args.action == "probe":
+    data = tool.probe()
+    jsondata = json.dumps(data, indent = 4)
+    print(jsondata)
 else:
     parser.print_help()
