@@ -4,6 +4,9 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+haralyzer = "*"
+dlib = "*"
+numpy = "*"
 
 [dev-packages]
 

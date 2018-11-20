@@ -1,0 +1,126 @@
+#!/usr/bin/env python3
+
+"""
+Do things with HAR archives, like extract all images.
+"""
+
+import argparse
+import json
+import sys
+import base64
+from hashlib import md5
+from haralyzer import HarParser
+from pprint import pprint
+
+class HarTool:
+    def __init__(self, path, verbose = False):
+        self.path = path
+        self.verbose = verbose
+
+        with open(self.path) as f:
+            data = json.loads(f.read())
+            self.parser = HarParser(data)
+
+    def extract_all(self):
+        # First save index.html
+        page = self.get_page()
+        index = page.actual_page
+        BASE_URL = index["request"]["url"]
+        self.save("index.html", index["response"]["content"]["text"])
+
+        # Okay, go on
+        for entry in page.entries:
+            path = entry["request"]["url"].replace(BASE_URL, "")
+            print(path)
+
+    def extract_images(self):
+        page = self.get_page()
+
+        for index, data in enumerate(page.image_files):
+            self.log(f"Extracting image {index}")
+
+            if ("response" not in data) or (data["response"]["status"] != 200):
+                self.log("No data in response or 200 error")
+                continue
+
+            content = data["response"]["content"]
+            filetype = content["mimeType"].split("/")[1]
+
+            # Why not?
+            if filetype == "jpeg":
+                filetype = "jpg"
+
+            rawdata = content["text"]
+            hash_ = self.hashstring(rawdata)
+
+            filename = "%s.%s" % (hash_, filetype)
+
+            self.log("Saving %s" % filename)
+
+            self.save(filename, rawdata, binary = True)
+
+    def get_page(self):
+        if len(self.parser.pages) > 1:
+            raise Exception("There's more than one page in this archive, please specify")
+        else:
+            return self.parser.pages[0]
+
+    def hashstring(self, s):
+        h = md5()
+        h.update(s.encode('utf-8'))
+        return h.hexdigest()
+
+    def list(self):
+        print("Listing pages in %s" % self.path)
+
+        for page in self.parser.pages:
+            print(page)
+
+            if self.verbose:
+                for entry in page.entries:
+                    url = entry["request"]["url"]
+                    self.log("  %s" % url)
+
+    def log(self, msg):
+        if self.verbose:
+            print(msg)
+
+    def save(self, filename, data, binary = False):
+        if binary:
+            if isinstance(data, str):
+                data = bytes(data, "utf-8")
+
+            with open(filename, "wb") as f:
+                bdata = base64.decodebytes(data)
+                f.write(bdata)
+        else:
+            with open(filename, "w") as f:
+                f.write(data)
+
+def main():
+    parser = argparse.ArgumentParser(description = "HAR (HTTP Archive) utility")
+    parser.add_argument("path", type = str, nargs='?', help="path to HAR file")
+    parser.add_argument("-p", "--page", help="specify page ID in archive")
+    parser.add_argument("-x", "--extract", action="store_true", help="extract all files")
+    parser.add_argument("-xi", "--extract-images", action="store_true", help="extract all images")
+    parser.add_argument("-ls", "--list", action="store_true", help="list pages in file, add -v to list assets too")
+    parser.add_argument("-v", "--verbose", action="store_true", help="print extra debug information")
+    args = parser.parse_args()
+
+    if not args.path:
+        parser.print_help()
+        sys.exit(2)
+
+    tool = HarTool(args.path, args.verbose)
+
+    if args.extract_images:
+        tool.extract_images()
+    elif args.list:
+        tool.list()
+    elif args.extract:
+        tool.extract_all()
+    else:
+        sys.exit("No command given")
+
+if __name__ == "__main__":
+    main()
