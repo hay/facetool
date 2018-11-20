@@ -44,12 +44,19 @@ import sys
 import os
 import argparse
 import logging
+import shutil
 from glob import glob
 
 from .media import is_image, is_video, extractframes, combineframes
 from .util import force_mkdir, get_basename, numberize_files
 
 logger = logging.getLogger(__name__)
+
+HEAD_TMP = "head-tmp"
+FACE_TMP = "face-tmp"
+OUT_TMP = "out-tmp"
+IMG_TO_VIDEO = (HEAD_TMP, OUT_TMP)
+VIDEO_TO_VIDEO = (HEAD_TMP, OUT_TMP, FACE_TMP)
 
 SCALE_FACTOR = 1
 FEATHER_AMOUNT = 11
@@ -250,19 +257,48 @@ class Faceswap:
         elif not os.path.isfile(face):
             raise Exception(f"'{face}' is not a file")
         elif is_video(head) and is_image(face):
-            """
-            [force_mkdir(p) for p in ("head-tmp", "out-tmp")]
-            extractframes(head, "head-tmp")
-
-            for path in glob("head-tmp/*"):
-                outpath = "out-tmp/" + get_basename(path) + ".jpg"
-                self.faceswap(path, face, outpath)
-
-            numberize_files("out-tmp")
-            """
-            combineframes("out-tmp", out)
-            # [shutil.rmtree(p) for p in ("head-tmp", "out-tmp")]
+            self.swap_image_to_video(head, face, out)
+        elif is_video(head) and is_video(face):
+            self.swap_video_to_video(head, face, out)
         elif is_image(head) and is_image(face):
             self.faceswap(head, face, out)
         else:
-            print("nope")
+            raise Exception("Invalid swap options")
+
+    def swap_image_to_video(self, head, face, out):
+        [force_mkdir(p) for p in IMG_TO_VIDEO]
+        extractframes(head, HEAD_TMP)
+
+        for path in glob(f"{HEAD_TMP}/*"):
+            outpath = f"{OUT_TMP}/{get_basename(path)}.jpg"
+            self.faceswap(path, face, outpath)
+
+        numberize_files(OUT_TMP)
+        combineframes(OUT_TMP, out)
+        [shutil.rmtree(p) for p in IMG_TO_VIDEO]
+
+    def swap_video_to_video(self, head, face, out):
+        [force_mkdir(p) for p in VIDEO_TO_VIDEO]
+        extractframes(head, HEAD_TMP)
+        extractframes(face, FACE_TMP)
+
+        heads = sorted(glob(f"{HEAD_TMP}/*"))
+        faces = sorted(glob(f"{FACE_TMP}/*"))
+
+        if len(heads) != len(faces):
+            logging.warning("Not the same amount of files in heads and faces")
+
+        for index, path in enumerate(heads):
+            outpath = f"{OUT_TMP}/{get_basename(path)}.jpg"
+
+            # Check if there is face, and if not, abort mission
+            if index > len(faces) - 1:
+                logging.warning("Not enough faces, aborting conversion")
+                break
+
+            face = faces[index]
+            self.faceswap(path, face, outpath)
+
+        numberize_files(OUT_TMP)
+        combineframes(OUT_TMP, out)
+        [shutil.rmtree(p) for p in VIDEO_TO_VIDEO]
