@@ -15,22 +15,28 @@ parser.add_argument('-pp', '--predictor-path', type = str, default = "./landmark
 parser.add_argument('-o', '--output', type = str, default = "out.jpg")
 parser.add_argument('-id', '--indirectory', type = str)
 parser.add_argument('-od', '--outdirectory', type = str)
+parser.add_argument('-s', '--swap', action="store_true", help = "Swap head and face parameters")
 parser.add_argument('-v', '--verbose', action="store_true")
 args = parser.parse_args()
 
 if args.verbose:
     logging.basicConfig(level=logging.DEBUG)
 
+if args.swap:
+    args.head, args.face = args.face, args.head
+
 swapper = Faceswap(predictor_path = args.predictor_path, verbose = args.verbose)
 
 if args.indirectory and args.head and args.outdirectory:
-    for path in glob("%s/*" % args.indirectory):
+    inpath = f"{args.indirectory}/*"
+
+    for path in glob(inpath):
         base = splitext(basename(path))[0]
-        out = "%s/%s.jpg" % (args.outdirectory, base)
-        logger.debug("Processing %s -> %s" % (path, out))
+        outpath = f"{args.outdirectory}/{base}.jpg"
+        logger.debug(f"Processing {path} -> {outpath}")
 
         try:
-            swapper.faceswap(head = args.head, face = path, output = out)
+            swapper.faceswap(head = path, face = args.head, output = outpath)
         except:
             logger.error("Couldn't convert this face")
 elif args.head and args.face:
