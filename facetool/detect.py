@@ -3,6 +3,7 @@
 import dlib
 import cv2
 import logging
+import os
 
 from .util import get_basename, mkdir_if_not_exists
 from skimage import io
@@ -19,7 +20,7 @@ class Detect:
         faces = self.detector(img)
 
         if len(faces) == 0:
-            logging.error(f"No faces in {image}")
+            logging.debug(f"No faces in {image}")
 
         return faces
 
@@ -41,9 +42,12 @@ class Detect:
             cv2.imwrite(outfile, crop)
             logging.debug(f"Cropped to {outfile}")
 
-    def locate(self, image, output = None):
+    def locate(self, image, output = None, to_directory = None):
         faces = self._get_faces(image)
         rects = []
+
+        if to_directory:
+            mkdir_if_not_exists(output)
 
         logging.debug(f"Getting rects")
 
@@ -69,6 +73,15 @@ class Detect:
                 logging.debug(f"{p1}, {p2}")
                 cv2.rectangle(out, p1, p2, c, 5)
 
-            cv2.imwrite(output, out)
+            # If output is a directory, generate a name based on the
+            # input filename
+            if to_directory:
+                outpath = f"{output}/{get_basename(image)}-crop.jpg"
+            else:
+                outpath = output
+
+            logging.debug(f"Writing to {outpath}")
+
+            cv2.imwrite(outpath, out)
 
         return rects

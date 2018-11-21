@@ -97,17 +97,24 @@ def main(args):
 
     elif args.command == "count":
         detect = Detect()
-        count = detect.count(args.input)
-        print(f"Number of faces in '{args.input}': {count}")
+
+        for path in util.globify(args.input):
+            count = detect.count(path)
+            print(f"Number of faces in '{path}': {count}")
 
     elif args.command == "locate":
         detect = Detect()
-        locations = detect.locate(args.input, args.output)
-        print(locations)
+
+        for path in util.globify(args.input):
+            to_directory = os.path.isdir(args.input)
+            locations = detect.locate(path, args.output, to_directory = to_directory)
+            print(locations)
 
     elif args.command == "crop":
         detect = Detect()
-        detect.crop(args.input, args.output)
+
+        for path in util.globify(args.input):
+            detect.crop(path, args.output)
 
     elif args.command == "swap":
         # First check if all arguments are given

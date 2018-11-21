@@ -42,6 +42,10 @@ Count the number of faces in `face.jpg`
 
     facetool.py count -i face.jpg
 
+Count the number of faces in all images in directory `faces`
+
+    facetool.py count -i faces
+
 Show the bounding box of all faces in `face.jpg`
 
     facetool.py locate -i face.jpg
@@ -49,6 +53,10 @@ Show the bounding box of all faces in `face.jpg`
 Create a new image called `face-box.jpg` that draws bounding boxes around all faces in `face.jpg`
 
     facetool.py locate -i face.jpg -o face.box.jpg
+
+Draw bounding boxes on all faces for all images in directory `faces` and save to `locations`
+
+    facetool.py locate -i faces -o locations
 
 Show the poses of all faces in `face.jpg`
 

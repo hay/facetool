@@ -24,6 +24,18 @@ def force_mkdir(paths):
 def get_basename(filename):
     return os.path.splitext(os.path.basename(filename))[0]
 
+# Return an iterator with all the files in a path, whether
+# it is a file or a folder
+def globify(path):
+    if os.path.isfile(path):
+        yield path
+    else:
+        files = glob(path + "/*")
+        files = sorted(list(files))
+
+        for f in files:
+            yield f
+
 def handle_exception(e, reraise = False):
     if reraise:
         raise(e)
