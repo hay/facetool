@@ -49,6 +49,8 @@ def get_parser():
     parser.add_argument("-kt", "--keep-temp", action = "store_true",
         help = "Keep temporary files (used with video swapping"
     )
+    parser.add_argument("--no-eyesbrows", action = "store_true")
+    parser.add_argument("--no-nosemouth", action = "store_true")
     parser.add_argument("-pp", "--predictor-path", type = str,
         default = "./data/landmarks.dat"
     )
@@ -133,7 +135,9 @@ def main(args):
             feather = args.feather,
             blur = args.blur,
             reraise_exceptions = args.extra_verbose,
-            keep_temp = args.keep_temp
+            keep_temp = args.keep_temp,
+            overlay_eyesbrows = not args.no_eyesbrows,
+            overlay_nosemouth = not args.no_nosemouth
         )
 
         # Face to directory of heads

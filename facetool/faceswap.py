@@ -60,6 +60,12 @@ LEFT_EYE_POINTS = list(range(42, 48))
 NOSE_POINTS = list(range(27, 35))
 JAW_POINTS = list(range(0, 17))
 
+EYES_BROWS_POINTS = (
+    LEFT_EYE_POINTS + RIGHT_EYE_POINTS + LEFT_BROW_POINTS + RIGHT_BROW_POINTS
+)
+
+NOSE_MOUTH_POINTS = NOSE_POINTS + MOUTH_POINTS
+
 # Points used to line up the images.
 ALIGN_POINTS = (
     LEFT_BROW_POINTS +
@@ -70,20 +76,6 @@ ALIGN_POINTS = (
     MOUTH_POINTS
 )
 
-# Points from the second image to overlay on the first. The convex hull of each
-# element will be overlaid.
-OVERLAY_POINTS = [
-    LEFT_EYE_POINTS +
-    RIGHT_EYE_POINTS +
-    LEFT_BROW_POINTS +
-    RIGHT_BROW_POINTS,
-    NOSE_POINTS + MOUTH_POINTS,
-]
-
-# Amount of blur to use during colour correction, as a fraction of the
-# pupillary distance.
-# COLOUR_CORRECT_BLUR_FRAC = 0.6
-
 class TooManyFaces(Exception):
     pass
 
@@ -92,12 +84,25 @@ class NoFaces(Exception):
 
 
 class Faceswap:
-    def __init__(self, predictor_path, feather = FEATHER_AMOUNT, blur = BLUR_AMOUNT):
+    def __init__(self,
+        predictor_path,
+        overlay_eyesbrows = True,
+        overlay_nosemouth = True,
+        feather = FEATHER_AMOUNT,
+        blur = BLUR_AMOUNT
+    ):
         self.predictor_path = predictor_path
         self.blur = blur
         self.detector = dlib.get_frontal_face_detector()
         self.feather = feather
         self.predictor = dlib.shape_predictor(self.predictor_path)
+        self.overlay_points = []
+
+        if overlay_eyesbrows:
+            self.overlay_points.append(EYES_BROWS_POINTS)
+
+        if overlay_nosemouth:
+            self.overlay_points.append(NOSE_MOUTH_POINTS)
 
     def _get_landmarks(self, im):
         rects = self.detector(im, 1)
@@ -127,7 +132,7 @@ class Faceswap:
     def _get_face_mask(self, im, landmarks):
         im = numpy.zeros(im.shape[:2], dtype=numpy.float64)
 
-        for group in OVERLAY_POINTS:
+        for group in self.overlay_points:
             self._draw_convex_hull(im,
                              landmarks[group],
                              color=1)

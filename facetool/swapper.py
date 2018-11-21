@@ -21,7 +21,9 @@ class Swapper:
         blur = BLUR_AMOUNT,
         feather = FEATHER_AMOUNT,
         keep_temp = False,
-        reraise_exceptions = False
+        reraise_exceptions = False,
+        overlay_eyesbrows = True,
+        overlay_nosemouth = True
     ):
         self.predictor_path = predictor_path
         self.keep_temp = keep_temp
@@ -31,7 +33,9 @@ class Swapper:
         self.swap = Faceswap(
             predictor_path = self.predictor_path,
             feather = self.feather,
-            blur = self.blur
+            blur = self.blur,
+            overlay_eyesbrows = overlay_eyesbrows,
+            overlay_nosemouth = overlay_nosemouth,
         )
 
     # FIXME: this swap parameter is *really* confusing, let's fix that at
