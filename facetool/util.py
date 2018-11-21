@@ -24,6 +24,17 @@ def force_mkdir(paths):
 def get_basename(filename):
     return os.path.splitext(os.path.basename(filename))[0]
 
+def handle_exception(e, reraise = False):
+    if reraise:
+        raise(e)
+    else:
+        msg = str(e)
+
+        if not msg:
+            msg = e.__class__.__name__
+
+        print(f"Error: {msg}")
+
 def numberize_files(path):
     files = sorted(list(glob(path + "/*")))
 

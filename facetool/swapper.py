@@ -5,7 +5,7 @@ from glob import glob
 from .constants import FEATHER_AMOUNT, BLUR_AMOUNT
 from .faceswap import Faceswap
 from .media import is_image, is_video, extractframes, combineframes
-from .util import force_mkdir, get_basename, numberize_files, mkdir_if_not_exists
+from .util import force_mkdir, get_basename, numberize_files, mkdir_if_not_exists, handle_exception
 
 logger = logging.getLogger(__name__)
 
@@ -18,16 +18,16 @@ VIDEO_TO_VIDEO = (HEAD_TMP, OUT_TMP, FACE_TMP)
 class Swapper:
     def __init__(self,
         predictor_path,
-        raise_exceptions = False,
-        keep_temp = False,
         blur = BLUR_AMOUNT,
-        feather = FEATHER_AMOUNT
+        feather = FEATHER_AMOUNT,
+        keep_temp = False,
+        reraise_exceptions = False
     ):
         self.predictor_path = predictor_path
-        self.raise_exceptions = raise_exceptions
         self.keep_temp = keep_temp
         self.blur = blur
         self.feather = feather
+        self.reraise_exceptions = reraise_exceptions
         self.swap = Faceswap(
             predictor_path = self.predictor_path,
             feather = self.feather,
@@ -51,16 +51,12 @@ class Swapper:
                 self._faceswap(image, path, outpath)
 
     def _faceswap(self, head, face, out):
-        logger.debug(f"Processing: face of {face} on head {head}")
+        print(f"Faceswapping {face} on {head}")
 
         try:
             self.swap.faceswap(head = head, face = face, output = out)
         except Exception as e:
-            if self.raise_exceptions:
-                raise(e)
-
-            logger.debug(e)
-            logger.error("Couldn't convert this face")
+            handle_exception(e, reraise = self.reraise_exceptions)
 
     def swap_directory_to_image(self, directory, image, out):
         logging.debug(f"Dir to image: faces of {directory} to {image}")

@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
-from facetool import media, Swapper, util, DEFAULT_FRAMERATE, FEATHER_AMOUNT, BLUR_AMOUNT
+from facetool import media, Swapper, util
+import facetool
 import argparse
 import logging
 import json
 import os
+import pdb
 
 COMMANDS = ("swap", "extractframes", "combineframes", "probe")
 logger = logging.getLogger(__name__)
 
-def main():
+def get_parser():
     parser = argparse.ArgumentParser(description = "Manipulate faces in videos and images")
 
     # Essentials
@@ -18,19 +20,32 @@ def main():
     parser.add_argument("-t", "--target", type = str)
 
     # Extra arguments
-    parser.add_argument("-bl", "--blur", type = float, default = BLUR_AMOUNT,
-        help = "Amount of blur to use during colour correction, as a fraction of the pupillary distance."
+    parser.add_argument("-bl", "--blur", type = float,
+        default = facetool.BLUR_AMOUNT,
+        help = "Amount of blur to use during colour correction"
     )
-    parser.add_argument("-f", "--framerate", type = str, default = DEFAULT_FRAMERATE)
-    parser.add_argument("-fa", "--feather", type = int, default = FEATHER_AMOUNT, help = "Softness of edges on a swapped face")
-    parser.add_argument("-kt", "--keep-temp", action = "store_true", help = "Keep temporary files (used with video swapping")
-    parser.add_argument("-pp", "--predictor-path", type = str, default = "./data/landmarks.dat")
-    parser.add_argument("-s", "--swap", action = "store_true", help = "Swap input and target")
+    parser.add_argument("-f", "--framerate", type = str,
+        default = facetool.DEFAULT_FRAMERATE
+    )
+    parser.add_argument("-fa", "--feather", type = int,
+        default = facetool.FEATHER_AMOUNT,
+        help = "Softness of edges on a swapped face"
+    )
+    parser.add_argument("-kt", "--keep-temp", action = "store_true",
+        help = "Keep temporary files (used with video swapping"
+    )
+    parser.add_argument("-pp", "--predictor-path", type = str,
+        default = "./data/landmarks.dat"
+    )
+    parser.add_argument("-s", "--swap", action = "store_true",
+        help = "Swap input and target"
+    )
     parser.add_argument("-v", "--verbose", action = "store_true")
     parser.add_argument("-vv", "--extra-verbose", action = "store_true")
 
-    args = parser.parse_args()
+    return parser
 
+def main(args):
     if args.verbose or args.extra_verbose:
         logging.basicConfig(level=logging.DEBUG)
 
@@ -50,23 +65,24 @@ def main():
         jsondata = json.dumps(data, indent = 4)
         print(jsondata)
     elif args.command == "swap":
-        swapper = Swapper(
-            predictor_path = args.predictor_path,
-            feather = args.feather,
-            blur = args.blur,
-            raise_exceptions = args.extra_verbose,
-            keep_temp = args.keep_temp
-        )
-
-        arguments = [args.input, args.target, args.output]
-
         # First check if all arguments are given
-        if not all(arguments):
+        arguments = [args.input, args.target]
+
+        if not all(arguments + [args.output]):
             raise Exception("Input, target and output are required for swapping")
 
         # And if these things are paths or files
         if not all([os.path.exists(a) for a in arguments]):
-            raise Exception("Input, target and output should all be valid files or directories")
+            raise Exception("Input and target should be valid files or directories")
+
+        # That is out of the way, set up the swapper
+        swapper = Swapper(
+            predictor_path = args.predictor_path,
+            feather = args.feather,
+            blur = args.blur,
+            reraise_exceptions = args.extra_verbose,
+            keep_temp = args.keep_temp
+        )
 
         # Face to directory of heads
         if media.is_image(args.input) and os.path.isdir(args.target):
@@ -97,4 +113,10 @@ def main():
         parser.print_help()
 
 if __name__ == "__main__":
-    main()
+    parser = get_parser()
+    args = parser.parse_args()
+
+    try:
+        main(args)
+    except Exception as e:
+        util.handle_exception(e, reraise = args.extra_verbose)
