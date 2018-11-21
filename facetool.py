@@ -15,9 +15,14 @@ def get_parser():
 
     # Essentials
     parser.add_argument("command", choices = COMMANDS, nargs = "?")
-    parser.add_argument("-i", "--input", type = str, required = True)
-    parser.add_argument("-o", "--output", type = str)
-    parser.add_argument("-t", "--target", type = str)
+    parser.add_argument("-i", "--input", type = str,
+        required = True,
+        help = "Input file or folder, 'face' when swapping"
+    )
+    parser.add_argument("-o", "--output", type = str, help = "Output file or folder")
+    parser.add_argument("-t", "--target", type = str,
+        help = "'Head' when swapping"
+    )
 
     # Extra arguments
     parser.add_argument("-bl", "--blur", type = float,
@@ -40,8 +45,12 @@ def get_parser():
     parser.add_argument("-s", "--swap", action = "store_true",
         help = "Swap input and target"
     )
-    parser.add_argument("-v", "--verbose", action = "store_true")
-    parser.add_argument("-vv", "--extra-verbose", action = "store_true")
+    parser.add_argument("-v", "--verbose", action = "store_true",
+        help = "Show debug information"
+    )
+    parser.add_argument("-vv", "--extra-verbose", action = "store_true",
+        help = "Show debug information AND raise / abort on exceptions"
+    )
 
     return parser
 

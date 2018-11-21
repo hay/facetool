@@ -38,11 +38,11 @@ The other way around: apply the face of `face.jpg` to a directory of `heads` and
 
 ### Face position
 
-Show the pose of `face.jpg`
+Show the poses of all faces in `face.jpg`
 
     facetool.py pose -i face.jpg
 
-Create a new image called `face-pose.jpg` that shows the shape and pose of `face.jpg`
+Create a new image called `face-pose.jpg` that shows the shapes and poses of `face.jpg`
 
     facetool.py pose -i face.jpg -o face-pose.jpg
 
@@ -61,23 +61,32 @@ Return metadata about an image or video file in JSON format
 
 ## All options
 
-    usage: facetool.py [-h] -i INPUT [-o OUTPUT] [-t TARGET] [-f FRAMERATE]
-                       [-pp PREDICTOR_PATH] [-s] [-v] [-vv]
-                       [{swap,extractframes,combineframes,probe}]
+  usage: facetool.py [-h] -i INPUT [-o OUTPUT] [-t TARGET] [-bl BLUR]
+                     [-fr FRAMERATE] [-fa FEATHER] [-kt] [-pp PREDICTOR_PATH]
+                     [-s] [-v] [-vv]
+                     [{swap,extractframes,combineframes,probe,pose}]
 
-    positional arguments:
-      {swap,extractframes,combineframes,probe}
+  positional arguments:
+    {swap,extractframes,combineframes,probe,pose}
 
-    optional arguments:
-      -h, --help            show this help message and exit
-      -i INPUT, --input INPUT
-      -o OUTPUT, --output OUTPUT
-      -t TARGET, --target TARGET
-      -f FRAMERATE, --framerate FRAMERATE
-      -pp PREDICTOR_PATH, --predictor-path PREDICTOR_PATH
-      -s, --swap            Swap input and target
-      -v, --verbose
-      -vv, --extra-verbose
+  optional arguments:
+    -h, --help            show this help message and exit
+    -i INPUT, --input INPUT
+                          Input file or folder, 'face' when swapping
+    -o OUTPUT, --output OUTPUT
+                          Output file or folder
+    -t TARGET, --target TARGET
+                          'Head' when swapping
+    -bl BLUR, --blur BLUR
+                          Amount of blur to use during colour correction
+    -fr FRAMERATE, --framerate FRAMERATE
+    -fa FEATHER, --feather FEATHER
+                          Softness of edges on a swapped face
+    -kt, --keep-temp      Keep temporary files (used with video swapping
+    -pp PREDICTOR_PATH, --predictor-path PREDICTOR_PATH
+    -s, --swap            Swap input and target
+    -v, --verbose         Show debug information
+    -vv, --extra-verbose  Show debug information AND raise / abort on exceptions
 
 ## Credits
 Written by [Hay Kranen](https://www.haykranen.nl).
