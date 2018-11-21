@@ -13,7 +13,7 @@ COMMANDS = (
     "crop",
     "extractframes",
     "locate",
-    "pose"
+    "pose",
     "probe",
     "swap",
 )
