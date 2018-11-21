@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from facetool import media, Swapper, DEFAULT_FRAMERATE
+from facetool import media, Swapper, util, DEFAULT_FRAMERATE
 import argparse
 import logging
 import json
@@ -31,14 +31,12 @@ if args.verbose or args.extra_verbose:
 
 logging.debug(args)
 
+# Swap around input and target
 if args.swap:
     args.input, args.target = args.target, args.input
 
 if args.command == "extractframes":
-    if not os.path.isdir(args.output):
-        logging.info(f"{args.output} does not exist, creating")
-        os.mkdir(args.output)
-
+    util.mkdir_if_not_exists(args.output)
     media.extractframes(args.input, args.output)
 elif args.command == "combineframes":
     media.combineframes(args.input, args.output, framerate = args.framerate)
@@ -53,17 +51,33 @@ elif args.command == "swap":
         keep_temp = args.keep_temp
     )
 
-    if not os.path.isfile(args.input):
-        raise Exception(f"'{args.input}' is not a file")
-    elif not os.path.isfile(args.target):
-        raise Exception(f"'{args.target}' is not a file")
+    if not all([args.input, args.target, args.output]):
+        raise Exception("Input, target and output are required for swapping")
+
+    # Face to directory of heads
+    if media.is_image(args.input) and os.path.isdir(args.target):
+        swapper.swap_image_to_directory(args.input, args.target, args.output)
+
+    # Directory of faces to head
+    elif os.path.isdir(args.input) and media.is_image(args.target):
+        swapper.swap_directory_to_image(args.input, args.target, args.output)
+
+    # Face in image to video
     elif media.is_video(args.target) and media.is_image(args.input):
         swapper.swap_image_to_video(args.target, args.input, args.output)
+
+    # Face of video to head in other video
     elif media.is_video(args.target) and media.is_video(args.input):
         swapper.swap_video_to_video(args.target, args.input, args.output)
+
+    # Image to image
     elif media.is_image(args.target) and media.is_image(args.input):
         swapper.swap_image_to_image(args.target, args.input, args.output)
+
+    # I don't even know if there is an option that isn't in the list above,
+    # but if it isn't, you'll get this
     else:
         raise Exception("Invalid swap options")
 else:
+    # No arguments, just display help
     parser.print_help()

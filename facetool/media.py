@@ -53,6 +53,9 @@ def extractframes(inp, out):
     _run(cmd)
 
 def is_image(inp):
+    if not os.path.isfile(inp):
+        return False
+
     data = probe(inp)
     return data["format"]["format_name"] == "image2"
 

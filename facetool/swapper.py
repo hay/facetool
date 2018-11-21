@@ -4,7 +4,7 @@ from glob import glob
 
 from .faceswap import Faceswap
 from .media import is_image, is_video, extractframes, combineframes
-from .util import force_mkdir, get_basename, numberize_files
+from .util import force_mkdir, get_basename, numberize_files, mkdir_if_not_exists
 
 logger = logging.getLogger(__name__)
 
@@ -21,8 +21,24 @@ class Swapper:
         self.keep_temp = keep_temp
         self.swap = Faceswap(self.predictor_path)
 
+    # FIXME: this swap parameter is *really* confusing, let's fix that at
+    # a later time
+    def _dirswap(self, image, directory, output_directory, swap = False):
+        logging.debug(f"Directory swapping: {image} to all files in {directory} to {output_directory}")
+        mkdir_if_not_exists(output_directory)
+        image_base = get_basename(image)
+
+        for path in glob(f"{directory}/*"):
+            basename = get_basename(path)
+            outpath = f"{output_directory}/{image_base}-{basename}.jpg"
+
+            if swap:
+                self._faceswap(path, image, outpath)
+            else:
+                self._faceswap(image, path, outpath)
+
     def _faceswap(self, head, face, out):
-        logger.debug(f"Processing {head} -> {face}")
+        logger.debug(f"Processing: face of {face} on head {head}")
 
         try:
             self.swap.faceswap(head = head, face = face, output = out)
@@ -32,6 +48,14 @@ class Swapper:
 
             logger.debug(e)
             logger.error("Couldn't convert this face")
+
+    def swap_directory_to_image(self, directory, image, out):
+        logging.debug(f"Dir to image: faces of {directory} to {image}")
+        self._dirswap(image, directory, out)
+
+    def swap_image_to_directory(self, image, directory, out):
+        logging.debug(f"Image to dir: face of {image} to {directory}")
+        self._dirswap(image, directory, out, swap = True)
 
     def swap_image_to_image(self, head, face, out):
         self._faceswap(head, face, out)

@@ -12,7 +12,9 @@ You'll need `git` and `pipenv` to run this tool.
 3. `pipenv shell`
 4. Run your command
 
-## Examples
+## Features
+
+### Face swapping on images and video files
 
 Put the features of face.jpg on head.jpg and save the result as swap.jpg
 
@@ -26,7 +28,15 @@ Put the features of a video file called face.mp4 on another video file called he
 
     facetool.py swap -i face.mp4 -t head.mp4 -o swap.mp4
 
-### Utility commands
+Take one 'head' image called `head.jpg` and generate a new faceswap for every file in a directory called `dir-to-face`.
+
+    facetool.py swap -i faces -t head.jpg -o dir-to-face
+
+The other way around: apply the face of `face.jpg` to a directory of `heads` and output to a directory called `face-to-dir`
+
+    facetool.py swap -i face.jpg -t heads -o face-to-dir
+
+### Media utilites
 Convert a movie file called `movie.mp4` to a set of JPG files in a directory called `frames` (used for video swapping)
 
     facetool.py extractframes -i movie.mp4 -o frames
