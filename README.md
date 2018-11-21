@@ -36,6 +36,16 @@ The other way around: apply the face of `face.jpg` to a directory of `heads` and
 
     facetool.py swap -i face.jpg -t heads -o face-to-dir
 
+### Face position
+
+Show the pose of `face.jpg`
+
+    facetool.py pose -i face.jpg
+
+Create a new image called `face-pose.jpg` that shows the shape and pose of `face.jpg`
+
+    facetool.py pose -i face.jpg -o face-pose.jpg
+
 ### Media utilites
 Convert a movie file called `movie.mp4` to a set of JPG files in a directory called `frames` (used for video swapping)
 

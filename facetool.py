@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from facetool import media, Swapper, util
+from facetool import media, Swapper, util, Poser
 import facetool
 import argparse
 import logging
@@ -7,7 +7,7 @@ import json
 import os
 import pdb
 
-COMMANDS = ("swap", "extractframes", "combineframes", "probe")
+COMMANDS = ("swap", "extractframes", "combineframes", "probe", "pose")
 logger = logging.getLogger(__name__)
 
 def get_parser():
@@ -24,7 +24,7 @@ def get_parser():
         default = facetool.BLUR_AMOUNT,
         help = "Amount of blur to use during colour correction"
     )
-    parser.add_argument("-f", "--framerate", type = str,
+    parser.add_argument("-fr", "--framerate", type = str,
         default = facetool.DEFAULT_FRAMERATE
     )
     parser.add_argument("-fa", "--feather", type = int,
@@ -55,15 +55,27 @@ def main(args):
     if args.swap:
         args.input, args.target = args.target, args.input
 
+    # Okay, the main stuff, get the command
+    # Extract all frames from a movie to a set of jpg files
     if args.command == "extractframes":
         util.mkdir_if_not_exists(args.output)
         media.extractframes(args.input, args.output)
+
+    # Combine all frames from a set of jpg files to a movie
     elif args.command == "combineframes":
         media.combineframes(args.input, args.output, framerate = args.framerate)
+
+    # Show metadata on a media file
     elif args.command == "probe":
         data = media.probe(args.input)
         jsondata = json.dumps(data, indent = 4)
         print(jsondata)
+
+    elif args.command == "pose":
+        poser = Poser(predictor_path = args.predictor_path)
+        poses = poser.get_poses(args.input, outpath = args.output)
+        print(f"{args.input}: {poses}")
+
     elif args.command == "swap":
         # First check if all arguments are given
         arguments = [args.input, args.target]
