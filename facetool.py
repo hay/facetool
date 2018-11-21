@@ -10,6 +10,7 @@ import pdb
 COMMANDS = (
     "combineframes",
     "count",
+    "crop",
     "extractframes",
     "locate",
     "pose"
@@ -103,6 +104,10 @@ def main(args):
         detect = Detect()
         locations = detect.locate(args.input, args.output)
         print(locations)
+
+    elif args.command == "crop":
+        detect = Detect()
+        detect.crop(args.input, args.output)
 
     elif args.command == "swap":
         # First check if all arguments are given

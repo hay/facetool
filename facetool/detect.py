@@ -4,6 +4,7 @@ import dlib
 import cv2
 import logging
 
+from .util import get_basename, mkdir_if_not_exists
 from skimage import io
 
 logger = logging.getLogger(__name__)
@@ -16,11 +17,29 @@ class Detect:
         logging.debug(f"Getting faces for {image}")
         img = io.imread(image)
         faces = self.detector(img)
+
+        if len(faces) == 0:
+            logging.error(f"No faces in {image}")
+
         return faces
 
     def count(self, image):
         faces = self._get_faces(image)
         return len(faces)
+
+    def crop(self, image, outpath):
+        logging.debug(f"Cropping {image} to {outpath}")
+        mkdir_if_not_exists(outpath)
+        rects = self.locate(image)
+        img = cv2.imread(image, cv2.IMREAD_COLOR)
+        basename = get_basename(image)
+
+        for index, rect in enumerate(rects):
+            outfile = f"{outpath}/{basename}-{index}.jpg"
+            x, y, x2, y2 = rect
+            crop = img[y:y2, x:x2]
+            cv2.imwrite(outfile, crop)
+            logging.debug(f"Cropped to {outfile}")
 
     def locate(self, image, output = None):
         faces = self._get_faces(image)

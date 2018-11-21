@@ -36,7 +36,7 @@ The other way around: apply the face of `face.jpg` to a directory of `heads` and
 
     facetool.py swap -i face.jpg -t heads -o face-to-dir
 
-### Face detection and position
+### Face detection, position and cropping
 
 Count the number of faces in `face.jpg`
 
@@ -57,6 +57,10 @@ Show the poses of all faces in `face.jpg`
 Create a new image called `face-pose.jpg` that shows the shapes and poses of `face.jpg`
 
     facetool.py pose -i face.jpg -o face-pose.jpg
+
+Crop all faces from `face.jpg` and save to new files in the directory `cropped`
+
+    facetool.py crop -i face.jpg -o cropped
 
 ### Media utilites
 Convert a movie file called `movie.mp4` to a set of JPG files in a directory called `frames` (used for video swapping)
