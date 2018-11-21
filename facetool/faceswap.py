@@ -37,6 +37,8 @@ sourceforge:
 
 """
 
+from .constants import FEATHER_AMOUNT
+
 import cv2
 import dlib
 import numpy
@@ -48,7 +50,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 SCALE_FACTOR = 1
-FEATHER_AMOUNT = 11
 
 FACE_POINTS = list(range(17, 68))
 MOUTH_POINTS = list(range(48, 61))
@@ -91,9 +92,10 @@ class NoFaces(Exception):
 
 
 class Faceswap:
-    def __init__(self, predictor_path):
+    def __init__(self, predictor_path, feather = FEATHER_AMOUNT):
         self.predictor_path = predictor_path
         self.detector = dlib.get_frontal_face_detector()
+        self.feather = feather
         self.predictor = dlib.shape_predictor(self.predictor_path)
 
     def _get_landmarks(self, im):
@@ -131,8 +133,8 @@ class Faceswap:
 
         im = numpy.array([im, im, im]).transpose((1, 2, 0))
 
-        im = (cv2.GaussianBlur(im, (FEATHER_AMOUNT, FEATHER_AMOUNT), 0) > 0) * 1.0
-        im = cv2.GaussianBlur(im, (FEATHER_AMOUNT, FEATHER_AMOUNT), 0)
+        im = (cv2.GaussianBlur(im, (self.feather, self.feather), 0) > 0) * 1.0
+        im = cv2.GaussianBlur(im, (self.feather, self.feather), 0)
 
         return im
 

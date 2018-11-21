@@ -2,6 +2,7 @@ import logging
 import shutil
 from glob import glob
 
+from .constants import FEATHER_AMOUNT
 from .faceswap import Faceswap
 from .media import is_image, is_video, extractframes, combineframes
 from .util import force_mkdir, get_basename, numberize_files, mkdir_if_not_exists
@@ -15,11 +16,20 @@ IMG_TO_VIDEO = (HEAD_TMP, OUT_TMP)
 VIDEO_TO_VIDEO = (HEAD_TMP, OUT_TMP, FACE_TMP)
 
 class Swapper:
-    def __init__(self, predictor_path, raise_exceptions = False, keep_temp = False):
+    def __init__(self,
+        predictor_path,
+        raise_exceptions = False,
+        keep_temp = False,
+        feather = FEATHER_AMOUNT
+    ):
         self.predictor_path = predictor_path
         self.raise_exceptions = raise_exceptions
         self.keep_temp = keep_temp
-        self.swap = Faceswap(self.predictor_path)
+        self.feather = feather
+        self.swap = Faceswap(
+            predictor_path = self.predictor_path,
+            feather = self.feather
+        )
 
     # FIXME: this swap parameter is *really* confusing, let's fix that at
     # a later time

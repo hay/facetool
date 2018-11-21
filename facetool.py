@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from facetool import media, Swapper, util, DEFAULT_FRAMERATE
+from facetool import media, Swapper, util, DEFAULT_FRAMERATE, FEATHER_AMOUNT
 import argparse
 import logging
 import json
@@ -18,6 +18,7 @@ parser.add_argument("-t", "--target", type = str)
 
 # Extra arguments
 parser.add_argument("-f", "--framerate", type = str, default = DEFAULT_FRAMERATE)
+parser.add_argument("-fa", "--feather", type = int, default = FEATHER_AMOUNT, help = "Softness of edges on a swapped face")
 parser.add_argument("-kt", "--keep-temp", action = "store_true", help = "Keep temporary files (used with video swapping")
 parser.add_argument("-pp", "--predictor-path", type = str, default = "./data/landmarks.dat")
 parser.add_argument("-s", "--swap", action = "store_true", help = "Swap input and target")
@@ -46,7 +47,8 @@ elif args.command == "probe":
     print(jsondata)
 elif args.command == "swap":
     swapper = Swapper(
-        args.predictor_path,
+        predictor_path = args.predictor_path,
+        feather = args.feather,
         raise_exceptions = args.extra_verbose,
         keep_temp = args.keep_temp
     )
