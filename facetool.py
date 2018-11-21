@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from facetool import media, Swapper, util, Poser
+from facetool import media, Swapper, util, Poser, Detect
 import facetool
 import argparse
 import logging
@@ -7,7 +7,16 @@ import json
 import os
 import pdb
 
-COMMANDS = ("swap", "extractframes", "combineframes", "probe", "pose")
+COMMANDS = (
+    "combineframes",
+    "count",
+    "extractframes",
+    "locate",
+    "pose"
+    "probe",
+    "swap",
+)
+
 logger = logging.getLogger(__name__)
 
 def get_parser():
@@ -84,6 +93,15 @@ def main(args):
         poser = Poser(predictor_path = args.predictor_path)
         poses = poser.get_poses(args.input, outpath = args.output)
         print(f"{args.input}: {poses}")
+
+    elif args.command == "count":
+        detect = Detect()
+        count = detect.count(args.input)
+        print(f"Number of faces in '{args.input}': {count}")
+
+    elif args.command == "locate":
+        detect = Detect()
+        print(detect.locate(args.input))
 
     elif args.command == "swap":
         # First check if all arguments are given

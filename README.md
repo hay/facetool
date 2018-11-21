@@ -1,5 +1,5 @@
-# facetool
-> Command line utility to manipulate faces in videos and images, written in Python 3
+# facetool.py
+> Command line utility to manipulate and detect faces in videos and images, written in Python 3
 
 This library and command line tool is mostly a wrapper around well-known libraries and algorithms like `ffmpeg`, `dlib`, `opencv` and `face_recognition`.
 
@@ -8,7 +8,7 @@ This library and command line tool is mostly a wrapper around well-known librari
 You'll need `git` and `pipenv` to run this tool.
 
 1. Clone this repository
-2. `pipenv install`
+2. `pipenv install`. This might take a while!
 3. `pipenv shell`
 4. Run your command
 
@@ -36,7 +36,19 @@ The other way around: apply the face of `face.jpg` to a directory of `heads` and
 
     facetool.py swap -i face.jpg -t heads -o face-to-dir
 
-### Face position
+### Face detection and position
+
+Count the number of faces in `face.jpg`
+
+    facetool.py count -i face.jpg
+
+Show the bounding box of all faces in `face.jpg`
+
+    facetool.py locate -i face.jpg
+
+Create a new image called `face-box.jpg` that draws bounding boxes around all faces in `face.jpg`
+
+    facetool.py locate -i face.jpg -o face.box.jpg
 
 Show the poses of all faces in `face.jpg`
 
