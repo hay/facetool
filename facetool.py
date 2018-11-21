@@ -101,7 +101,8 @@ def main(args):
 
     elif args.command == "locate":
         detect = Detect()
-        print(detect.locate(args.input))
+        locations = detect.locate(args.input, args.output)
+        print(locations)
 
     elif args.command == "swap":
         # First check if all arguments are given
