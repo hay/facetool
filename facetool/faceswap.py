@@ -37,7 +37,7 @@ sourceforge:
 
 """
 
-from .constants import FEATHER_AMOUNT
+from .constants import FEATHER_AMOUNT, BLUR_AMOUNT
 
 import cv2
 import dlib
@@ -82,7 +82,7 @@ OVERLAY_POINTS = [
 
 # Amount of blur to use during colour correction, as a fraction of the
 # pupillary distance.
-COLOUR_CORRECT_BLUR_FRAC = 0.6
+# COLOUR_CORRECT_BLUR_FRAC = 0.6
 
 class TooManyFaces(Exception):
     pass
@@ -92,8 +92,9 @@ class NoFaces(Exception):
 
 
 class Faceswap:
-    def __init__(self, predictor_path, feather = FEATHER_AMOUNT):
+    def __init__(self, predictor_path, feather = FEATHER_AMOUNT, blur = BLUR_AMOUNT):
         self.predictor_path = predictor_path
+        self.blur = blur
         self.detector = dlib.get_frontal_face_detector()
         self.feather = feather
         self.predictor = dlib.shape_predictor(self.predictor_path)
@@ -196,7 +197,7 @@ class Faceswap:
         return output_im
 
     def _correct_colours(self, im1, im2, landmarks1):
-        blur_amount = COLOUR_CORRECT_BLUR_FRAC * numpy.linalg.norm(
+        blur_amount = self.blur * numpy.linalg.norm(
                                   numpy.mean(landmarks1[LEFT_EYE_POINTS], axis=0) -
                                   numpy.mean(landmarks1[RIGHT_EYE_POINTS], axis=0))
         blur_amount = int(blur_amount)

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from facetool import media, Swapper, util, DEFAULT_FRAMERATE, FEATHER_AMOUNT
+from facetool import media, Swapper, util, DEFAULT_FRAMERATE, FEATHER_AMOUNT, BLUR_AMOUNT
 import argparse
 import logging
 import json
@@ -17,6 +17,9 @@ parser.add_argument("-o", "--output", type = str)
 parser.add_argument("-t", "--target", type = str)
 
 # Extra arguments
+parser.add_argument("-bl", "--blur", type = float, default = BLUR_AMOUNT,
+    help = "Amount of blur to use during colour correction, as a fraction of the pupillary distance."
+)
 parser.add_argument("-f", "--framerate", type = str, default = DEFAULT_FRAMERATE)
 parser.add_argument("-fa", "--feather", type = int, default = FEATHER_AMOUNT, help = "Softness of edges on a swapped face")
 parser.add_argument("-kt", "--keep-temp", action = "store_true", help = "Keep temporary files (used with video swapping")
@@ -49,12 +52,20 @@ elif args.command == "swap":
     swapper = Swapper(
         predictor_path = args.predictor_path,
         feather = args.feather,
+        blur = args.blur,
         raise_exceptions = args.extra_verbose,
         keep_temp = args.keep_temp
     )
 
-    if not all([args.input, args.target, args.output]):
+    arguments = [args.input, args.target, args.output]
+
+    # First check if all arguments are given
+    if not all(arguments):
         raise Exception("Input, target and output are required for swapping")
+
+    # And if these things are paths or files
+    if not all([os.path.exists(a) for a in arguments]):
+        raise Exception("Input, target and output should all be valid files or directories")
 
     # Face to directory of heads
     if media.is_image(args.input) and os.path.isdir(args.target):

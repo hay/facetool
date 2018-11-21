@@ -2,7 +2,7 @@ import logging
 import shutil
 from glob import glob
 
-from .constants import FEATHER_AMOUNT
+from .constants import FEATHER_AMOUNT, BLUR_AMOUNT
 from .faceswap import Faceswap
 from .media import is_image, is_video, extractframes, combineframes
 from .util import force_mkdir, get_basename, numberize_files, mkdir_if_not_exists
@@ -20,15 +20,18 @@ class Swapper:
         predictor_path,
         raise_exceptions = False,
         keep_temp = False,
+        blur = BLUR_AMOUNT,
         feather = FEATHER_AMOUNT
     ):
         self.predictor_path = predictor_path
         self.raise_exceptions = raise_exceptions
         self.keep_temp = keep_temp
+        self.blur = blur
         self.feather = feather
         self.swap = Faceswap(
             predictor_path = self.predictor_path,
-            feather = self.feather
+            feather = self.feather,
+            blur = self.blur
         )
 
     # FIXME: this swap parameter is *really* confusing, let's fix that at
