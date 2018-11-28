@@ -4,10 +4,19 @@
 This library and command line tool is mostly a wrapper around well-known libraries and algorithms like `ffmpeg`, `dlib`, `opencv` and `face_recognition`.
 
 ## Installation
-You'll need `git` and [`pipenv`](https://pipenv.readthedocs.io/en/latest/install/#installing-pipenv). Obviously, you also need a working installation of Python 3. I recommend the [Anaconda](https://www.anaconda.com/download) distribution. If you're on macOS this will all be much easier if you first install [`brew`](https://brew.sh/).
 
-1. Clone this repository: `git clone https://github.com/hay/facetool.git`
-2. Run `pipenv install`. This might take a while!
+### macOS
+I highly recommend using [`brew`](https://brew.sh/) to install all dependencies. You'll also need a working version of Python 3.6 and [`pipenv`](https://pipenv.readthedocs.io/en/latest/install/#installing-pipenv) (the latter is installable with `brew`). Given that you have Python 3.6 on your system this should be enough:
+
+1. Clone this repository:
+
+  git clone https://github.com/hay/facetool.git
+
+2. Install dependencies using `brew`:
+
+  brew install cmake ffmpeg pipenv
+
+2. Run `pipenv install` in the root folder of tthe checked out folder. This might take a while!
 3. Run `pipenv shell`
 4. Try running the script by typing `./facetool.py`
 
