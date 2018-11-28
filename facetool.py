@@ -116,7 +116,11 @@ def main(args):
         detect = Detect()
 
         for path in util.globify(args.input):
-            detect.crop(path, args.output)
+            print(f"Cropping <{path}>")
+            try:
+                detect.crop(path, args.output)
+            except Exception as e:
+                util.handle_exception(e, reraise = args.extra_verbose)
 
     elif args.command == "swap":
         # First check if all arguments are given
