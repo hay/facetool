@@ -9,16 +9,16 @@ This library and command line tool is mostly a wrapper around well-known librari
 I highly recommend using [`brew`](https://brew.sh/) to install all dependencies. You'll also need a working version of Python 3.6 and [`pipenv`](https://pipenv.readthedocs.io/en/latest/install/#installing-pipenv) (the latter is installable with `brew`). Given that you have Python 3.6 on your system this should be enough:
 
 1. Clone this repository:
-
+```bash
     git clone https://github.com/hay/facetool.git
-
+```
 2. Install dependencies using `brew`:
-
+```bash
     brew install cmake ffmpeg pipenv
-
-2. Run `pipenv install` in the root folder of tthe checked out folder. This might take a while!
-3. Run `pipenv shell`
-4. Try running the script by typing `./facetool.py`
+```
+3. Run `pipenv install` in the root folder of tthe checked out folder. This might take a while!
+4. Run `pipenv shell`
+5. Try running the script by typing `./facetool.py`
 
 If that all works you can try some of the commands below.
 
