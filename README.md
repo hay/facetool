@@ -10,11 +10,11 @@ I highly recommend using [`brew`](https://brew.sh/) to install all dependencies.
 
 1. Clone this repository:
 
-  git clone https://github.com/hay/facetool.git
+    git clone https://github.com/hay/facetool.git
 
 2. Install dependencies using `brew`:
 
-  brew install cmake ffmpeg pipenv
+    brew install cmake ffmpeg pipenv
 
 2. Run `pipenv install` in the root folder of tthe checked out folder. This might take a while!
 3. Run `pipenv shell`
