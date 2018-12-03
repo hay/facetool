@@ -115,6 +115,8 @@ class Swapper:
         if len(heads) != len(faces):
             logging.warning("Not the same amount of files in heads and faces")
 
+        self.filecount = len(heads)
+
         for index, path in enumerate(heads):
             outpath = f"{OUT_TMP}/{get_basename(path)}.jpg"
 
