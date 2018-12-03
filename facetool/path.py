@@ -3,8 +3,8 @@ import pathlib
 from .constants import IMAGE_EXTENSIONS
 
 class Path(type(pathlib.Path())):
-    def filecount(self):
-        return len(list(self.glob("*")))
+    def count_images(self):
+        return len(list(self.images()))
 
     def images(self):
         for path in self.glob("*"):

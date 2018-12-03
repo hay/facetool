@@ -6,6 +6,7 @@ import logging
 import json
 import os
 import pdb
+from tqdm import tqdm
 
 COMMANDS = (
     "combineframes",
@@ -144,8 +145,10 @@ def main(args):
         pbar = tqdm()
 
         def update_pbar():
-            pbar.set_total(swapper.filecount)
-            pbar.update(swapper.done)
+            # print(swapper.done, swapper.filecount)
+            pbar.total = swapper.filecount
+            pbar.update()
+            pbar.write(swapper.last_message)
 
         # That is out of the way, set up the swapper
         swapper = Swapper(
@@ -183,6 +186,8 @@ def main(args):
         # but if it isn't, you'll get this
         else:
             raise Exception("Invalid swap options")
+
+        pbar.close()
     else:
         # No arguments, just display help
         parser.print_help()

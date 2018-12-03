@@ -30,6 +30,7 @@ class Swapper:
     ):
         self.done = 0
         self.filecount = None
+        self.last_message = None
         self.predictor_path = predictor_path
         self.keep_temp = keep_temp
         self.blur = blur
@@ -51,9 +52,9 @@ class Swapper:
         mkdir_if_not_exists(output_directory)
         image_base = get_basename(image)
         dirpath = Path(directory)
+        self.filecount = dirpath.count_images()
 
         for path in dirpath.images():
-            print(type(path))
             basename = get_basename(path)
             outpath = f"{output_directory}/{image_base}-{basename}.jpg"
 
@@ -63,7 +64,8 @@ class Swapper:
                 self._faceswap(image, path, outpath)
 
     def _faceswap(self, head, face, out):
-        print(f"Faceswapping {face} on {head}, saving to {out}")
+        msg = f"Faceswapping {face} on {head}, saving to {out}"
+        self.last_message = msg
 
         try:
             self.swap.faceswap(head = str(head), face = str(face), output = str(out))
