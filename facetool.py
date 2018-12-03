@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from facetool import media, Swapper, util, Poser, Detect
+from facetool import media, Swapper, util, Poser, Detect, Path
 import facetool
 import argparse
 import logging
@@ -29,7 +29,10 @@ def get_parser():
         required = True,
         help = "Input file or folder, 'face' when swapping"
     )
-    parser.add_argument("-o", "--output", type = str, help = "Output file or folder")
+    parser.add_argument("-o", "--output", type = str,
+        help = "Output file or folder",
+        default = None
+    )
     parser.add_argument("-t", "--target", type = str,
         help = "'Head' when swapping"
     )
@@ -76,6 +79,10 @@ def main(args):
     if args.swap:
         args.input, args.target = args.target, args.input
 
+    inp = Path(args.input)
+    out = Path(args.output)
+    target = Path(args.target)
+
     # Okay, the main stuff, get the command
     # Extract all frames from a movie to a set of jpg files
     if args.command == "extractframes":
@@ -100,14 +107,14 @@ def main(args):
     elif args.command == "count":
         detect = Detect()
 
-        for path in util.globify(args.input):
+        for path in inp.files():
             count = detect.count(path)
             print(f"Number of faces in '{path}': {count}")
 
     elif args.command == "locate":
         detect = Detect()
 
-        for path in util.globify(args.input):
+        for path in inp.files():
             to_directory = os.path.isdir(args.input)
             locations = detect.locate(path, args.output, to_directory = to_directory)
             print(locations)
@@ -115,8 +122,9 @@ def main(args):
     elif args.command == "crop":
         detect = Detect()
 
-        for path in util.globify(args.input):
+        for path in inp.files():
             print(f"Cropping <{path}>")
+
             try:
                 detect.crop(path, args.output)
             except Exception as e:
