@@ -28,6 +28,7 @@ class Swapper:
         reporthook = None
 
     ):
+        self.done = 0
         self.filecount = None
         self.predictor_path = predictor_path
         self.keep_temp = keep_temp
@@ -66,6 +67,7 @@ class Swapper:
 
         try:
             self.swap.faceswap(head = str(head), face = str(face), output = str(out))
+            self.done = self.done + 1
         except Exception as e:
             handle_exception(e, reraise = self.reraise_exceptions)
 

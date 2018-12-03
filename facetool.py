@@ -141,8 +141,11 @@ def main(args):
         if not all([os.path.exists(a) for a in arguments]):
             raise Exception("Input and target should be valid files or directories")
 
-        def hoi():
-            print("hoi")
+        pbar = tqdm()
+
+        def update_pbar():
+            pbar.set_total(swapper.filecount)
+            pbar.update(swapper.done)
 
         # That is out of the way, set up the swapper
         swapper = Swapper(
@@ -153,7 +156,7 @@ def main(args):
             keep_temp = args.keep_temp,
             overlay_eyesbrows = not args.no_eyesbrows,
             overlay_nosemouth = not args.no_nosemouth,
-            reporthook = hoi
+            reporthook = update_pbar
         )
 
         # Face to directory of heads
