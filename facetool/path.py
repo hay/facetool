@@ -1,30 +1,18 @@
-import os
-import logging
-from glob import glob
+# Cheers < https://stackoverflow.com/a/34116756/152809 >
+import pathlib
+from .constants import IMAGE_EXTENSIONS
 
-logger = logging.getLogger(__name__)
+class Path(type(pathlib.Path())):
+    def filecount(self):
+        return len(list(self.glob("*")))
 
-class Path:
-    def __init__(self, path):
-        self._path = path
+    def images(self):
+        for path in self.glob("*"):
+            if path.suffix in IMAGE_EXTENSIONS:
+                yield path
 
-        if self._path:
-            self.is_file = os.path.isfile(self._path)
-            self.is_dir = os.path.isdir(self._path)
-            self.basename = os.path.splitext(os.path.basename(self._path))[0]
+    def open(self, mode='r', buffering=-1, encoding=None, errors=None, newline=None):
+        if encoding is None and 'b' not in mode:
+            encoding = 'utf-8'
 
-    def files(self):
-        if self.is_file:
-            yield self._path
-        else:
-            files = glob(path + "/*")
-            files = sorted(list(files))
-
-            for f in files:
-                yield f
-
-    def __repr__(self):
-        return self._path
-
-    def __str__(self):
-        return self._path
+        return super().open(mode, buffering, encoding, errors, newline)

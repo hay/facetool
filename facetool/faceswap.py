@@ -184,6 +184,7 @@ class Faceswap:
                              numpy.matrix([0., 0., 1.])])
 
     def _read_im_and_landmarks(self, fname):
+        logger.debug(f"Reading {fname} for landmarks")
         im = cv2.imread(fname, cv2.IMREAD_COLOR)
         im = cv2.resize(im, (im.shape[1] * SCALE_FACTOR,
                              im.shape[0] * SCALE_FACTOR))
@@ -218,7 +219,7 @@ class Faceswap:
                                                     im2_blur.astype(numpy.float64))
 
     def faceswap(self, head, face, output):
-        logger.debug(f"Faceswap {head} to {face} as {output}")
+        logger.debug(f"Faceswap {head} on {face} as {output}")
 
         im1, landmarks1 = self._read_im_and_landmarks(head)
         im2, landmarks2 = self._read_im_and_landmarks(face)

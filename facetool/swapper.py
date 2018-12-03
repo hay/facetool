@@ -1,6 +1,7 @@
 import logging
 import shutil
 from glob import glob
+from .path import Path
 
 from .constants import FEATHER_AMOUNT, BLUR_AMOUNT
 from .faceswap import Faceswap
@@ -23,13 +24,17 @@ class Swapper:
         keep_temp = False,
         reraise_exceptions = False,
         overlay_eyesbrows = True,
-        overlay_nosemouth = True
+        overlay_nosemouth = True,
+        reporthook = None
+
     ):
+        self.filecount = None
         self.predictor_path = predictor_path
         self.keep_temp = keep_temp
         self.blur = blur
         self.feather = feather
         self.reraise_exceptions = reraise_exceptions
+        self.reporthook = reporthook
         self.swap = Faceswap(
             predictor_path = self.predictor_path,
             feather = self.feather,
@@ -44,8 +49,10 @@ class Swapper:
         logging.debug(f"Directory swapping: {image} to all files in {directory} to {output_directory}")
         mkdir_if_not_exists(output_directory)
         image_base = get_basename(image)
+        dirpath = Path(directory)
 
-        for path in glob(f"{directory}/*"):
+        for path in dirpath.images():
+            print(type(path))
             basename = get_basename(path)
             outpath = f"{output_directory}/{image_base}-{basename}.jpg"
 
@@ -58,9 +65,12 @@ class Swapper:
         print(f"Faceswapping {face} on {head}, saving to {out}")
 
         try:
-            self.swap.faceswap(head = head, face = face, output = out)
+            self.swap.faceswap(head = str(head), face = str(face), output = str(out))
         except Exception as e:
             handle_exception(e, reraise = self.reraise_exceptions)
+
+        if self.reporthook:
+            self.reporthook()
 
     def swap_directory_to_image(self, directory, image, out):
         logging.debug(f"Dir to image: faces of {directory} to {image}")
@@ -71,13 +81,16 @@ class Swapper:
         self._dirswap(image, directory, out, swap = True)
 
     def swap_image_to_image(self, head, face, out):
+        self.filecount = 1
         self._faceswap(head, face, out)
 
     def swap_image_to_video(self, head, face, out):
         [force_mkdir(p) for p in IMG_TO_VIDEO]
         extractframes(head, HEAD_TMP)
+        dirpath = Path(HEAD_TMP)
+        self.filecount = len(dirpath.glob("*"))
 
-        for path in glob(f"{HEAD_TMP}/*"):
+        for path in dirpath.glob("*"):
             outpath = f"{OUT_TMP}/{get_basename(path)}.jpg"
             self._faceswap(path, face, outpath)
 
