@@ -55,7 +55,7 @@ class Swapper:
                 self._faceswap(image, path, outpath)
 
     def _faceswap(self, head, face, out):
-        print(f"Faceswapping {face} on {head}")
+        print(f"Faceswapping {face} on {head}, saving to {out}")
 
         try:
             self.swap.faceswap(head = head, face = face, output = out)
