@@ -145,10 +145,11 @@ def main(args):
         pbar = tqdm()
 
         def update_pbar():
-            # print(swapper.done, swapper.filecount)
             pbar.total = swapper.filecount
             pbar.update()
-            pbar.write(swapper.last_message)
+
+            if args.verbose:
+                pbar.write(swapper.last_message)
 
         # That is out of the way, set up the swapper
         swapper = Swapper(
