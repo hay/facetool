@@ -1,6 +1,7 @@
 import os
 import shutil
 import logging
+from . import config
 from glob import glob
 logger = logging.getLogger(__name__)
 
@@ -45,7 +46,8 @@ def handle_exception(e, reraise = False):
         if not msg:
             msg = e.__class__.__name__
 
-        print(f"Error: {msg}")
+        if config.VERBOSE:
+            print(f"Error: {msg}")
 
 def numberize_files(path):
     files = sorted(list(glob(path + "/*")))

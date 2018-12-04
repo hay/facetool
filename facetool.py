@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from facetool import media, Swapper, util, Poser, Detect, Path
+from facetool import media, Swapper, util, Poser, Detect, Path, config
 import facetool
 import argparse
 import logging
@@ -75,6 +75,8 @@ def main(args):
         logging.basicConfig(level=logging.DEBUG)
 
     logging.debug(args)
+
+    config.VERBOSE = args.verbose or args.extra_verbose
 
     # Swap around input and target
     if args.swap:
@@ -163,8 +165,12 @@ def main(args):
             reporthook = update_pbar
         )
 
+        # Directory of faces to directory of heads
+        if inp.is_dir() and target.is_dir():
+            swapper.swap_directory_to_directory(inp, target, out)
+
         # Face to directory of heads
-        if media.is_image(args.input) and os.path.isdir(args.target):
+        elif media.is_image(args.input) and os.path.isdir(args.target):
             swapper.swap_image_to_directory(args.input, args.target, args.output)
 
         # Directory of faces to head

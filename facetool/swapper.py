@@ -52,7 +52,7 @@ class Swapper:
         mkdir_if_not_exists(output_directory)
         image_base = get_basename(image)
         dirpath = Path(directory)
-        self.filecount = dirpath.count_images()
+        self._set_filecount(dirpath.count_images())
 
         for path in dirpath.images():
             basename = get_basename(path)
@@ -76,6 +76,19 @@ class Swapper:
         if self.reporthook:
             self.reporthook()
 
+    def _set_filecount(self, filecount):
+        if not self.filecount:
+            self.filecount = filecount
+        else:
+            logging.debug("Already set filecount")
+
+    def swap_directory_to_directory(self, face_dir, head_dir, out_dir):
+        logging.debug(f"Dir to dir: faces in {face_dir} to heads in {head_dir} to {out_dir}")
+        self._set_filecount(face_dir.count_images() * head_dir.count_images())
+
+        for face in face_dir.images():
+            self.swap_image_to_directory(face, head_dir, out_dir)
+
     def swap_directory_to_image(self, directory, image, out):
         logging.debug(f"Dir to image: faces of {directory} to {image}")
         self._dirswap(image, directory, out)
@@ -92,7 +105,7 @@ class Swapper:
         [force_mkdir(p) for p in IMG_TO_VIDEO]
         extractframes(head, HEAD_TMP)
         dirpath = Path(HEAD_TMP)
-        self.filecount = len(dirpath.glob("*"))
+        self._set_filecount(len(dirpath.glob("*")))
 
         for path in dirpath.glob("*"):
             outpath = f"{OUT_TMP}/{get_basename(path)}.jpg"
@@ -115,7 +128,7 @@ class Swapper:
         if len(heads) != len(faces):
             logging.warning("Not the same amount of files in heads and faces")
 
-        self.filecount = len(heads)
+        self._set_filecount(len(heads))
 
         for index, path in enumerate(heads):
             outpath = f"{OUT_TMP}/{get_basename(path)}.jpg"
