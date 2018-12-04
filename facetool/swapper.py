@@ -105,7 +105,7 @@ class Swapper:
         [force_mkdir(p) for p in IMG_TO_VIDEO]
         extractframes(head, HEAD_TMP)
         dirpath = Path(HEAD_TMP)
-        self._set_filecount(len(dirpath.glob("*")))
+        self._set_filecount(dirpath.count_images())
 
         for path in dirpath.glob("*"):
             outpath = f"{OUT_TMP}/{get_basename(path)}.jpg"
