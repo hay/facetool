@@ -102,6 +102,7 @@ class Faceswap:
         self.feather = feather
         self.predictor = dlib.shape_predictor(self.predictor_path)
         self.overlay_points = []
+        self.landmark_hashes = {}
 
         if overlay_eyesbrows:
             self.overlay_points.append(EYES_BROWS_POINTS)
@@ -110,14 +111,32 @@ class Faceswap:
             self.overlay_points.append(NOSE_MOUTH_POINTS)
 
     def _get_landmarks(self, im):
+        # This is by far the slowest part of the whole algorithm, so we
+        # cache the landmarks if the image is the same, especially when
+        # dealing with videos this makes things twice as fast
+        img_hash = hash(im.data.tobytes())
+
+        # Well, if it works :/
+        if config.CACHE_LANDMARKS:
+            if img_hash in self.landmark_hashes:
+                logging.debug("Landmarks are cached, return those")
+                return self.landmarks_hashes[img_hash]
+
+        profiler.tick("start_detector")
         rects = self.detector(im, 1)
+        profiler.tick("end_detector")
 
         if len(rects) > 1:
             raise TooManyFaces
         if len(rects) == 0:
             raise NoFaces
 
-        return numpy.matrix([[p.x, p.y] for p in self.predictor(im, rects[0]).parts()])
+        landmarks = numpy.matrix([[p.x, p.y] for p in self.predictor(im, rects[0]).parts()])
+
+        # Save to image cache
+        self.landmark_hashes[img_hash] = landmarks
+
+        return landmarks
 
     def _annotate_landmarks(self, im, landmarks):
         im = im.copy()
@@ -191,9 +210,18 @@ class Faceswap:
     def _read_im_and_landmarks(self, fname):
         logger.debug(f"Reading {fname} for landmarks")
         im = cv2.imread(fname, cv2.IMREAD_COLOR)
+        profiler.tick("_read_im_and_landmarks (imread)")
+
+        hash_id = hash(im.data.tobytes())
+        profiler.tick("hash image")
+
         im = cv2.resize(im, (im.shape[1] * SCALE_FACTOR,
                              im.shape[0] * SCALE_FACTOR))
+
+        profiler.tick("_read_im_and_landmarks (resize)")
+
         s = self._get_landmarks(im)
+        profiler.tick("_read_im_and_landmarks (_get_landmarks)")
 
         return im, s
 
