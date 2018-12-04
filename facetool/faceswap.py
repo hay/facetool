@@ -227,8 +227,9 @@ class Faceswap:
         logger.debug(f"Faceswap {head} on {face} as {output}")
 
         im1, landmarks1 = self._read_im_and_landmarks(head)
+        profiler.tick("_read_im_and_landmarks (head)")
         im2, landmarks2 = self._read_im_and_landmarks(face)
-        profiler.tick("_read_im_and_landmarks")
+        profiler.tick("_read_im_and_landmarks (face)")
 
         M = self._transformation_from_points(landmarks1[ALIGN_POINTS],
                                        landmarks2[ALIGN_POINTS])
