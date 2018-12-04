@@ -8,7 +8,7 @@ class Path(type(pathlib.Path())):
 
     def images(self):
         for path in self.glob("*"):
-            if path.suffix in IMAGE_EXTENSIONS:
+            if path.suffix.lower() in IMAGE_EXTENSIONS:
                 yield path
 
     def open(self, mode='r', buffering=-1, encoding=None, errors=None, newline=None):
