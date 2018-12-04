@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from facetool import media, Swapper, util, Poser, Detect, Path, config
+from facetool import media, Swapper, util, Poser, Detect, Path, config, Profiler
 import facetool
 import argparse
 import logging
@@ -20,6 +20,10 @@ COMMANDS = (
 )
 
 logger = logging.getLogger(__name__)
+
+# Note that we always profile, we just don't print the output if the
+# option is not enabled
+profiler = Profiler("facetool.py")
 
 def get_parser():
     parser = argparse.ArgumentParser(description = "Manipulate faces in videos and images")
@@ -58,6 +62,9 @@ def get_parser():
     parser.add_argument("-pp", "--predictor-path", type = str,
         default = "./data/landmarks.dat"
     )
+    parser.add_argument("--profile", action = "store_true",
+        help = "Show profiler information"
+    )
     parser.add_argument("-s", "--swap", action = "store_true",
         help = "Swap input and target"
     )
@@ -76,6 +83,7 @@ def main(args):
 
     logging.debug(args)
 
+    config.PROFILE = args.profile
     config.VERBOSE = args.verbose or args.extra_verbose
 
     # Swap around input and target
@@ -134,6 +142,7 @@ def main(args):
                 util.handle_exception(e, reraise = args.extra_verbose)
 
     elif args.command == "swap":
+        profiler.tick("start swapping")
         # First check if all arguments are given
         arguments = [args.input, args.target]
 
@@ -195,6 +204,7 @@ def main(args):
             raise Exception("Invalid swap options")
 
         pbar.close()
+        profiler.tick("done swapping")
     else:
         # No arguments, just display help
         parser.print_help()
@@ -207,3 +217,6 @@ if __name__ == "__main__":
         main(args)
     except Exception as e:
         util.handle_exception(e, reraise = args.extra_verbose)
+
+    if config.PROFILE:
+        profiler.dump_events()

@@ -2,7 +2,6 @@ import logging
 import shutil
 from glob import glob
 from .path import Path
-
 from .constants import FEATHER_AMOUNT, BLUR_AMOUNT
 from .faceswap import Faceswap
 from .media import is_image, is_video, extractframes, combineframes

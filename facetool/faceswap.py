@@ -38,6 +38,8 @@ sourceforge:
 """
 
 from .constants import FEATHER_AMOUNT, BLUR_AMOUNT
+from .profiler import Profiler
+profiler = Profiler("faceswap.py")
 
 import cv2
 import dlib
@@ -46,6 +48,9 @@ import sys
 import os
 import argparse
 import logging
+from . import config
+
+profiler.tick("importing libraries")
 
 logger = logging.getLogger(__name__)
 
@@ -223,18 +228,34 @@ class Faceswap:
 
         im1, landmarks1 = self._read_im_and_landmarks(head)
         im2, landmarks2 = self._read_im_and_landmarks(face)
+        profiler.tick("_read_im_and_landmarks")
 
         M = self._transformation_from_points(landmarks1[ALIGN_POINTS],
                                        landmarks2[ALIGN_POINTS])
 
+        profiler.tick("_transformation_from_points")
+
         mask = self._get_face_mask(im2, landmarks2)
+        profiler.tick("_get_face_mask")
+
         warped_mask = self._warp_im(mask, M, im1.shape)
+        profiler.tick("_warp_im")
+
         combined_mask = numpy.max([self._get_face_mask(im1, landmarks1), warped_mask],
                                   axis=0)
+        profiler.tick("combined_mask")
 
         warped_im2 = self._warp_im(im2, M, im1.shape)
+        profiler.tick("_warp_im")
+
         warped_corrected_im2 = self._correct_colours(im1, warped_im2, landmarks1)
+        profiler.tick("_correct_colours")
 
         output_im = im1 * (1.0 - combined_mask) + warped_corrected_im2 * combined_mask
+        profiler.tick("output_im")
 
         cv2.imwrite(output, output_im)
+        profiler.tick("imwrite")
+
+        if config.PROFILE:
+            profiler.dump_events()
