@@ -85,8 +85,8 @@ class Swapper:
         logging.debug(f"Dir to dir: faces in {face_dir} to heads in {head_dir} to {out_dir}")
         self._set_filecount(Path(face_dir).count_images() * Path(head_dir).count_images())
 
-        for face in face_dir.images():
-            self.swap_image_to_directory(face, head_dir, out_dir)
+        for face in Path(face_dir).images():
+            self.swap_image_to_directory(str(face), head_dir, out_dir)
 
     def swap_directory_to_image(self, directory, image, out):
         logging.debug(f"Dir to image: faces of {directory} to {image}")
