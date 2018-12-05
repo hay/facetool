@@ -6,8 +6,15 @@ class Path(type(pathlib.Path())):
     def count_images(self):
         return len(list(self.images()))
 
+    def files(self):
+        if self.is_file():
+            yield Path(str(self))
+        else:
+            for path in self.glob("*"):
+                yield path
+
     def images(self):
-        for path in self.glob("*"):
+        for path in self.files():
             if path.suffix.lower() in IMAGE_EXTENSIONS:
                 yield path
 

@@ -90,10 +90,6 @@ def main(args):
     if args.swap:
         args.input, args.target = args.target, args.input
 
-    inp = Path(args.input)
-    out = Path(args.output)
-    target = Path(args.target)
-
     # Okay, the main stuff, get the command
     # Extract all frames from a movie to a set of jpg files
     if args.command == "extractframes":
@@ -118,14 +114,14 @@ def main(args):
     elif args.command == "count":
         detect = Detect()
 
-        for path in inp.files():
+        for path in Path(args.input).images():
             count = detect.count(path)
             print(f"Number of faces in '{path}': {count}")
 
     elif args.command == "locate":
         detect = Detect()
 
-        for path in inp.files():
+        for path in Path(args.input).images():
             to_directory = os.path.isdir(args.input)
             locations = detect.locate(path, args.output, to_directory = to_directory)
             print(locations)
@@ -133,11 +129,11 @@ def main(args):
     elif args.command == "crop":
         detect = Detect()
 
-        for path in inp.files():
+        for path in Path(args.input).images():
             print(f"Cropping <{path}>")
 
             try:
-                detect.crop(path, args.output)
+                detect.crop(str(path), args.output)
             except Exception as e:
                 util.handle_exception(e, reraise = args.extra_verbose)
 
@@ -175,15 +171,15 @@ def main(args):
         )
 
         # Directory of faces to directory of heads
-        if inp.is_dir() and target.is_dir():
-            swapper.swap_directory_to_directory(inp, target, out)
+        if Path(args.input).is_dir() and Path(args.target).is_dir():
+            swapper.swap_directory_to_directory(args.input, args.target, args.output)
 
         # Face to directory of heads
-        elif media.is_image(args.input) and os.path.isdir(args.target):
+        elif media.is_image(args.input) and Path(args.target).is_dir():
             swapper.swap_image_to_directory(args.input, args.target, args.output)
 
         # Directory of faces to head
-        elif os.path.isdir(args.input) and media.is_image(args.target):
+        elif Path(args.input).is_dir() and media.is_image(args.target):
             swapper.swap_directory_to_image(args.input, args.target, args.output)
 
         # Face in image to video

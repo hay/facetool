@@ -2,6 +2,8 @@
 
 cd ../
 
+rm -rf test/output/*
+
 exec() {
     printf "\n"
     echo "***"
@@ -21,19 +23,19 @@ exec "Show help" "-h"
 
 exec "Count faces (single image)" "count -i test/img-group/1.jpg -o test/output/count-single"
 
-exec "Crop faces (image)" "crop -i test/img-single/1.jpg -o test/output/crop-image/image.jpg"
+exec "Crop faces (image)" "crop -i test/img-single/1.jpg -o test/output/crop-image.jpg"
 
-exec "Crop faces (directory)" "count -i test/img-single -o test/output/crop-folder"
+exec "Crop faces (directory)" "crop -i test/img-single -o test/output/crop-folder"
 
 exec "Locate faces (image)" " locate -i test/img-single/1.jpg"
 
-exec "Pose face (image)" "pose -i test/img-single/1.jpg -o test/output/pose-image/image.jpg"
+exec "Pose face (image)" "pose -i test/img-single/1.jpg -o test/output/pose-image.jpg"
 
 exec "Probe image" "probe -i test/img-single/1.jpg"
 
 exec "Probe video" "probe -i test/video/1.mp4"
 
-exec "Swap: image to image" "swap -i test/img-single/1.jpg -t test/img-single/3.jpg -o test/output/swap-image-to-image/image.jpg"
+exec "Swap: image to image" "swap -i test/img-single/1.jpg -t test/img-single/3.jpg -o test/output/swap-image-to-image.jpg"
 
 exec "Swap: image to dir" "swap -i test/img-single/1.jpg -t test/img-single -o test/output/swap-image-to-dir"
 
