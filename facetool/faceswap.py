@@ -115,13 +115,11 @@ class Faceswap:
         # This is by far the slowest part of the whole algorithm, so we
         # cache the landmarks if the image is the same, especially when
         # dealing with videos this makes things twice as fast
-        img_hash = hash(im.data.tobytes())
+        img_hash = str(abs(hash(im.data.tobytes())))
 
-        # Well, if it works :/
-        if config.CACHE_LANDMARKS:
-            if img_hash in self.landmark_hashes:
-                logging.debug("Landmarks are cached, return those")
-                return self.landmarks_hashes[img_hash]
+        if config.CACHE_LANDMARKS and img_hash in self.landmark_hashes:
+            logging.debug("Landmarks are cached, return those")
+            return self.landmark_hashes[img_hash]
 
         profiler.tick("start_detector")
         rects = self.detector(im, 1)
@@ -212,9 +210,6 @@ class Faceswap:
         logger.debug(f"Reading {fname} for landmarks")
         im = cv2.imread(fname, cv2.IMREAD_COLOR)
         profiler.tick("_read_im_and_landmarks (imread)")
-
-        hash_id = hash(im.data.tobytes())
-        profiler.tick("hash image")
 
         im = cv2.resize(im, (im.shape[1] * SCALE_FACTOR,
                              im.shape[0] * SCALE_FACTOR))
