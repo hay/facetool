@@ -2,6 +2,7 @@ import os
 import shutil
 import logging
 from . import config
+from .faceswap import TooManyFaces, NoFaces
 from glob import glob
 logger = logging.getLogger(__name__)
 
@@ -38,7 +39,9 @@ def globify(path):
             yield f
 
 def handle_exception(e, reraise = False):
-    if reraise:
+    face_exception = isinstance(e, NoFaces) or isinstance(e, TooManyFaces)
+
+    if reraise and not face_exception:
         raise(e)
     else:
         msg = str(e)
