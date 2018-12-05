@@ -43,6 +43,6 @@ exec "Swap dir to image" "swap -i test/img-single -t test/img-single/1.jpg -o te
 
 exec "Swap dir to dir" "swap -i test/img-single -t test/img-single -o test/output/swap-dir-to-dir"
 
-exec "Swap image to video" "swap -i test/img-single/1.jpg -t test/video/1.mp4 -o test/output/swap-image-to-video"
+exec "Swap image to video" "swap -i test/img-single/1.jpg -t test/video/1.mp4 -o test/output/swap-image-to-video.mp4"
 
-exec "Swap video to video" "swap -i test/video/1.mp4 -t test/video/2.mp4 -o test/output/swap-video-to-video"
+exec "Swap video to video" "swap -i test/video/1.mp4 -t test/video/2.mp4 -o test/output/swap-video-to-video.mp4"
