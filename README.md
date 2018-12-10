@@ -1,7 +1,13 @@
 # facetool.py
 > Command line utility to manipulate and detect faces in videos and images, written in Python 3
 
-This library and command line tool is mostly a wrapper around well-known libraries and algorithms like `ffmpeg`, `dlib`, `opencv` and `face_recognition`.
+![Facetool header logo](data/header.gif)
+
+This utility allows you to do all kinds of operations on face images and videos, straight from the command line:
+* Face swapping
+* Counting faces
+* Cropping faces
+* Extracting and combining frames from and to videos
 
 ## Installation
 
@@ -22,7 +28,7 @@ I highly recommend using [`brew`](https://brew.sh/) to install all dependencies.
 
 If that all works you can try some of the commands below.
 
-## Features
+## Examples
 
 ### Face swapping on images and video files
 
@@ -96,15 +102,16 @@ Return metadata about an image or video file in JSON format
 ## All options
 
 ```bash
-usage: facetool.py [-h] -i INPUT [-o OUTPUT] [-t TARGET] [-bl BLUR]
-                   [-fr FRAMERATE] [-fa FEATHER] [-kt] [-pp PREDICTOR_PATH]
-                   [-s] [-v] [-vv]
-                   [{combineframes,count,crop,extractframes,locate,poseprobe,swap}]
+usage: facetool [-h] -i INPUT [-o OUTPUT] [-t TARGET] [-bl BLUR]
+                [-fr FRAMERATE] [-fa FEATHER] [-kt] [--no-eyesbrows]
+                [--no-nosemouth] [-pp PREDICTOR_PATH] [--profile] [-s] [-v]
+                [-vv]
+                [{combineframes,count,crop,extractframes,locate,pose,probe,swap}]
 
 Manipulate faces in videos and images
 
 positional arguments:
-  {combineframes,count,crop,extractframes,locate,poseprobe,swap}
+  {combineframes,count,crop,extractframes,locate,pose,probe,swap}
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -120,14 +127,29 @@ optional arguments:
   -fa FEATHER, --feather FEATHER
                         Softness of edges on a swapped face
   -kt, --keep-temp      Keep temporary files (used with video swapping
+  --no-eyesbrows
+  --no-nosemouth
   -pp PREDICTOR_PATH, --predictor-path PREDICTOR_PATH
+  --profile             Show profiler information
   -s, --swap            Swap input and target
   -v, --verbose         Show debug information
   -vv, --extra-verbose  Show debug information AND raise / abort on exceptions
 ```
 
+## Limitations
+* Face swapping is limited to one face.
+* More advanced swapping methods like 'deepfake' are not supported.
+* Even though you could use the library in your own scripts (instead of using the command line utility), this isn't very well supported yet.
+* No multithreading / processor support.
+* No face recognition support.
+
+## Testing
+`facetool` doesn't have a proper test suite yet, but you could try running `test-all.sh` in the `test` directory to try a couple of common examples.
+
 ## Credits
 Written by [Hay Kranen](https://www.haykranen.nl).
+
+This utility is built around well-known libraries like `dlib`, `face_recognition` and `opencv`.
 
 ### Faceswapping
 Faceswapping algorithm by [Matthew Earl](http://matthewearl.github.io/2015/07/28/switching-eds-with-python/), licensed under the MIT license.
