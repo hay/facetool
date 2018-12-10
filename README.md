@@ -142,6 +142,7 @@ optional arguments:
 * Even though you could use the library in your own scripts (instead of using the command line utility), this isn't very well supported yet.
 * No multithreading / processor support.
 * No face recognition support.
+* Operations on videos will remove the audio.
 
 ## Testing
 `facetool` doesn't have a proper test suite yet, but you could try running `test-all.sh` in the `test` directory to try a couple of common examples.
