@@ -21,6 +21,11 @@ COMMANDS = (
     "swap",
 )
 
+OUTPUT_FORMAT_CHOICES = (
+    "default",
+    "csv"
+)
+
 logger = logging.getLogger(__name__)
 
 # Note that we always profile, we just don't print the output if the
@@ -65,6 +70,10 @@ def get_parser():
     )
     parser.add_argument("--no-eyesbrows", action = "store_true")
     parser.add_argument("--no-nosemouth", action = "store_true")
+    parser.add_argument("-of", "--output-format",
+        choices = OUTPUT_FORMAT_CHOICES,
+        help = "Specify output format"
+    )
     parser.add_argument("-pp", "--predictor-path", type = str,
         default = PREDICTOR_PATH
     )
@@ -146,8 +155,12 @@ def main(args):
     elif args.command == "classify":
         classifier = Classifier(
             data_directory = args.data_directory,
+            output_format = args.output_format,
             predictor_path = args.predictor_path
         )
+
+        if args.output_format == "csv" and not args.output:
+            raise Exception("With CSV as output format, a filename (-o) is required")
 
         for path in Path(args.input).images():
             print(f"Classifying <{path}>")
@@ -156,6 +169,9 @@ def main(args):
                 classifier.classify(str(path))
             except Exception as e:
                 util.handle_exception(e, reraise = args.extra_verbose)
+
+        if args.output_format == "csv":
+            classifier.to_csv(args.output)
 
     elif args.command == "swap":
         profiler.tick("start swapping")
