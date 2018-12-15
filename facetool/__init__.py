@@ -1,3 +1,4 @@
+from .classifier import Classifier
 from .constants import *
 from .detect import Detect
 from .faceswap import Faceswap

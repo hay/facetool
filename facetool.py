@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-from facetool import media, Swapper, util, Poser, Detect, Path, config, Profiler
+from facetool import media, Swapper, util, Poser, Detect, Path, config
+from facetool import Profiler, Classifier, DATA_DIRECTORY, PREDICTOR_PATH
 import facetool
 import argparse
 import logging
@@ -9,6 +10,7 @@ import pdb
 from tqdm import tqdm
 
 COMMANDS = (
+    "classify",
     "combineframes",
     "count",
     "crop",
@@ -47,6 +49,10 @@ def get_parser():
         default = facetool.BLUR_AMOUNT,
         help = "Amount of blur to use during colour correction"
     )
+    parser.add_argument("-dd", "--data-directory", type = str,
+        default = DATA_DIRECTORY,
+        help = "Directory where the data files are located"
+    )
     parser.add_argument("-fr", "--framerate", type = str,
         default = facetool.DEFAULT_FRAMERATE
     )
@@ -60,7 +66,7 @@ def get_parser():
     parser.add_argument("--no-eyesbrows", action = "store_true")
     parser.add_argument("--no-nosemouth", action = "store_true")
     parser.add_argument("-pp", "--predictor-path", type = str,
-        default = "./data/landmarks.dat"
+        default = PREDICTOR_PATH
     )
     parser.add_argument("--profile", action = "store_true",
         help = "Show profiler information"
@@ -134,6 +140,20 @@ def main(args):
 
             try:
                 detect.crop(str(path), args.output)
+            except Exception as e:
+                util.handle_exception(e, reraise = args.extra_verbose)
+
+    elif args.command == "classify":
+        classifier = Classifier(
+            data_directory = args.data_directory,
+            predictor_path = args.predictor_path
+        )
+
+        for path in Path(args.input).images():
+            print(f"Classifying <{path}>")
+
+            try:
+                classifier.classify(str(path))
             except Exception as e:
                 util.handle_exception(e, reraise = args.extra_verbose)
 

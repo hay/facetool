@@ -11,6 +11,8 @@ opencv-python = "*"
 ffmpeg-python = "*"
 scikit-image = "*"
 tqdm = "*"
+imutils = "*"
+tensorflow = "*"
 
 [dev-packages]
 
