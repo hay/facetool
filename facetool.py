@@ -18,6 +18,7 @@ COMMANDS = (
     "count",
     "crop",
     "extractframes",
+    "landmarks",
     "locate",
     "pose",
     "probe",
@@ -26,7 +27,8 @@ COMMANDS = (
 
 OUTPUT_FORMAT_CHOICES = (
     "default",
-    "csv"
+    "csv",
+    "json"
 )
 
 logger = logging.getLogger(__name__)
@@ -128,6 +130,34 @@ def main(args):
         jsondata = json.dumps(data, indent = 4)
         print(jsondata)
 
+    elif args.command == "landmarks":
+        if not args.output or not args.output_format:
+            raise Exception("Landmarks option needs output file and format")
+
+        from facetool.landmarks import Landmarks
+
+        landmarks = Landmarks(predictor_path = args.predictor_path)
+        data = []
+
+        for path in Path(args.input).images():
+            try:
+                marks = landmarks.get_landmarks(str(path))
+            except Exception as e:
+                util.handle_exception(e, reraise = args.extra_verbose)
+
+            points = [str(path)]
+            [points.extend([m.x, m.y]) for m in marks]
+            data.append(points)
+
+        df = pd.DataFrame(data)
+
+        if args.output_format == "csv":
+            df.to_csv(args.output)
+        elif args.output_format == "json":
+            df.to_json(args.output)
+        else:
+            raise Exception(f"Invalid output format: {args.output_format}")
+
     elif args.command == "pose":
         from facetool.poser import Poser
 
@@ -148,12 +178,15 @@ def main(args):
                 out = Path(args.output)
 
                 if out.is_dir():
-
                     outpath = f"{out}/{Path(path).name}"
                 else:
                     outpath = str(out)
 
-            poses = poser.get_poses(path, outpath = outpath)
+            try:
+                poses = poser.get_poses(path, outpath = outpath)
+            except Exception as e:
+                util.handle_exception(e, reraise = args.extra_verbose)
+
             print(f"{path}: {poses}")
 
     elif args.command == "count":
