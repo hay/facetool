@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from facetool import media, Swapper, util, Poser, Detect, Path, config
-from facetool import Profiler, Classifier, DATA_DIRECTORY, PREDICTOR_PATH
+from facetool import Profiler, DATA_DIRECTORY, PREDICTOR_PATH
 import facetool
 import argparse
 import logging
@@ -153,6 +153,8 @@ def main(args):
                 util.handle_exception(e, reraise = args.extra_verbose)
 
     elif args.command == "classify":
+        from facetool.classifier import Classifier
+
         classifier = Classifier(
             data_directory = args.data_directory,
             output_format = args.output_format,
