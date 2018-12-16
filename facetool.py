@@ -9,6 +9,7 @@ import argparse
 import logging
 import json
 import os
+import pandas as pd
 import pdb
 
 COMMANDS = (
@@ -103,6 +104,10 @@ def main(args):
     config.PROFILE = args.profile
     config.VERBOSE = args.verbose or args.extra_verbose
 
+    # Check for invalid argument combinations
+    if args.output_format == "csv" and not args.output:
+        raise Exception("With CSV as output format, a filename (-o) is required")
+
     # Swap around input and target
     if args.swap:
         args.input, args.target = args.target, args.input
@@ -135,9 +140,26 @@ def main(args):
 
         detect = Detect()
 
+        if args.output_format == "csv":
+            csv = []
+
         for path in Path(args.input).images():
-            count = detect.count(path)
+            try:
+                count = detect.count(path)
+            except Exception as e:
+                util.handle_exception(e, reraise = args.extra_verbose)
+
             print(f"Number of faces in '{path}': {count}")
+
+            if args.output_format == "csv":
+                csv.append({
+                    "path" : path,
+                    "count" : count
+                })
+
+        if args.output_format == "csv":
+            df = pd.DataFrame(csv)
+            df.to_csv(args.output)
 
     elif args.command == "locate":
         from facetool.detect import Detect
@@ -170,9 +192,6 @@ def main(args):
             output_format = args.output_format,
             predictor_path = args.predictor_path
         )
-
-        if args.output_format == "csv" and not args.output:
-            raise Exception("With CSV as output format, a filename (-o) is required")
 
         for path in Path(args.input).images():
             print(f"Classifying <{path}>")
