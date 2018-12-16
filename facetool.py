@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
-from facetool import media, Swapper, util, Poser, Detect, Path, config
-from facetool import Profiler, DATA_DIRECTORY, PREDICTOR_PATH
-import facetool
+from facetool import config, media, util
+from facetool.path import Path
+from facetool.profiler import Profiler
+from facetool.constants import *
+
+from tqdm import tqdm
 import argparse
 import logging
 import json
 import os
 import pdb
-from tqdm import tqdm
 
 COMMANDS = (
     "classify",
@@ -51,7 +53,7 @@ def get_parser():
 
     # Extra arguments
     parser.add_argument("-bl", "--blur", type = float,
-        default = facetool.BLUR_AMOUNT,
+        default = BLUR_AMOUNT,
         help = "Amount of blur to use during colour correction"
     )
     parser.add_argument("-dd", "--data-directory", type = str,
@@ -59,10 +61,10 @@ def get_parser():
         help = "Directory where the data files are located"
     )
     parser.add_argument("-fr", "--framerate", type = str,
-        default = facetool.DEFAULT_FRAMERATE
+        default = DEFAULT_FRAMERATE
     )
     parser.add_argument("-fa", "--feather", type = int,
-        default = facetool.FEATHER_AMOUNT,
+        default = FEATHER_AMOUNT,
         help = "Softness of edges on a swapped face"
     )
     parser.add_argument("-kt", "--keep-temp", action = "store_true",
@@ -122,11 +124,15 @@ def main(args):
         print(jsondata)
 
     elif args.command == "pose":
+        from facetool.poser import Poser
+
         poser = Poser(predictor_path = args.predictor_path)
         poses = poser.get_poses(args.input, outpath = args.output)
         print(f"{args.input}: {poses}")
 
     elif args.command == "count":
+        from facetool.detect import Detect
+
         detect = Detect()
 
         for path in Path(args.input).images():
@@ -134,6 +140,8 @@ def main(args):
             print(f"Number of faces in '{path}': {count}")
 
     elif args.command == "locate":
+        from facetool.detect import Detect
+
         detect = Detect()
 
         for path in Path(args.input).images():
@@ -142,6 +150,8 @@ def main(args):
             print(locations)
 
     elif args.command == "crop":
+        from facetool.detect import Detect
+
         detect = Detect()
 
         for path in Path(args.input).images():
@@ -176,6 +186,8 @@ def main(args):
             classifier.to_csv(args.output)
 
     elif args.command == "swap":
+        from facetool.swapper import Swapper
+
         profiler.tick("start swapping")
         # First check if all arguments are given
         arguments = [args.input, args.target]
