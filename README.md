@@ -8,6 +8,7 @@ This utility allows you to do all kinds of operations on face images and videos,
 * Counting faces
 * Cropping faces
 * Extracting and combining frames from and to videos
+* Classifying faces based on age and gender
 
 ## Installation
 
@@ -51,6 +52,16 @@ Take one 'head' image called `head.jpg` and generate a new faceswap for every fi
 The other way around: apply the face of `face.jpg` to a directory of `heads` and output to a directory called `face-to-dir`
 
     facetool.py swap -i face.jpg -t heads -o face-to-dir
+
+### Classifying age and gender
+
+Get the age and gender of a single image and print to console
+
+    facetool.py classify -i face.jpg
+
+Get the age and gender of all images in a folder and write to a csv file
+
+    facetool.py classify -i faces/ -of csv -o classified.csv
 
 ### Face detection, position and cropping
 
@@ -147,6 +158,9 @@ optional arguments:
 ## Testing
 `facetool` doesn't have a proper test suite yet, but you could try running `test-all.sh` in the `test` directory to try a couple of common examples.
 
+## License
+Licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
 ## Credits
 Written by [Hay Kranen](https://www.haykranen.nl).
 
@@ -157,5 +171,7 @@ Faceswapping algorithm by [Matthew Earl](http://matthewearl.github.io/2015/07/28
 
 Copyright (c) 2015 Matthew Earl
 
-## License
-Licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### Age and gender classifier
+Age and gender classifier by [Boyuan Jiang](https://github.com/BoyuanJiang/Age-Gender-Estimate-TF), licensed under the MIT license.
+
+Copyright (c) 2017 Boyuan
