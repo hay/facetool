@@ -132,8 +132,29 @@ def main(args):
         from facetool.poser import Poser
 
         poser = Poser(predictor_path = args.predictor_path)
-        poses = poser.get_poses(args.input, outpath = args.output)
-        print(f"{args.input}: {poses}")
+
+        # Check if we *could* have an output directory, and if so,
+        # create it
+        if args.output and Path(args.output).could_be_dir():
+            Path(args.output).mkdir_if_not_exists()
+
+        for pathobj in Path(args.input).images():
+            path = str(pathobj)
+            logging.debug(f"Processing {path}")
+
+            if not args.output:
+                outpath = None
+            else:
+                out = Path(args.output)
+
+                if out.is_dir():
+
+                    outpath = f"{out}/{Path(path).name}"
+                else:
+                    outpath = str(out)
+
+            poses = poser.get_poses(path, outpath = outpath)
+            print(f"{path}: {poses}")
 
     elif args.command == "count":
         from facetool.detect import Detect
