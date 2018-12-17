@@ -63,4 +63,4 @@ class Landmarks:
 
             cv2.imwrite(outpath, out)
 
-        return shape
+        return shape.parts()
