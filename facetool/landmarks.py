@@ -1,11 +1,13 @@
 from skimage import io
 from .util import rect_to_bb, Point
+from imutils import face_utils
+import cv2
 import dlib
 import logging
 logger = logging.getLogger(__name__)
 
 class Landmarks:
-    def __init__(self, predictor_path, normalize_coords = True):
+    def __init__(self, predictor_path, normalize_coords = False):
         self.detector = dlib.get_frontal_face_detector()
         self.predictor = dlib.shape_predictor(predictor_path)
         self.normalize_coords = normalize_coords
@@ -32,7 +34,7 @@ class Landmarks:
 
         return [_coord(p) for p in shape]
 
-    def get_landmarks(self, path):
+    def get_landmarks(self, path, outpath = False):
         nr_of_faces, faces, img = self._get_faces(path)
 
         if nr_of_faces == 0:
@@ -44,9 +46,21 @@ class Landmarks:
             logging.warning("Detected multiple faces, using the first one")
 
         face = faces[0]
-        shape = self.predictor(img, face).parts()
+        shape = self.predictor(img, face)
 
         if self.normalize_coords:
             shape = self._normalize(shape, face)
+
+        if outpath:
+            logging.debug(f"Saving to {outpath}")
+            out = cv2.imread(path, cv2.IMREAD_COLOR)
+
+            # Also create an image with bounding box and landmarkd dots
+            shape_np = face_utils.shape_to_np(shape)
+
+            for (x, y) in shape_np:
+                cv2.circle(out, (x, y), 3, (0, 0, 255), -1)
+
+            cv2.imwrite(outpath, out)
 
         return shape

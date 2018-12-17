@@ -131,32 +131,57 @@ def main(args):
         print(jsondata)
 
     elif args.command == "landmarks":
-        if not args.output or not args.output_format:
-            raise Exception("Landmarks option needs output file and format")
-
         from facetool.landmarks import Landmarks
 
         landmarks = Landmarks(predictor_path = args.predictor_path)
-        data = []
 
-        for path in Path(args.input).images():
+        save_data = args.output_format and args.output_format != "default"
+
+        if save_data:
+            data = []
+
+        # Check if we *could* have an output directory, and if so,
+        # create it
+        if args.output and Path(args.output).could_be_dir():
+            Path(args.output).mkdir_if_not_exists()
+
+        for pathobj in Path(args.input).images():
+            path = str(pathobj)
+            logging.debug(f"Processing {path}")
+
+            print(f"Getting landmarks of {path}")
+
+            if not args.output:
+                outpath = None
+            else:
+                out = Path(args.output)
+
+                if out.is_dir():
+                    outpath = f"{out}/{Path(path).name}"
+                else:
+                    outpath = str(out)
+
             try:
-                marks = landmarks.get_landmarks(str(path))
+                marks = landmarks.get_landmarks(str(path), outpath = outpath)
             except Exception as e:
                 util.handle_exception(e, reraise = args.extra_verbose)
 
-            points = [str(path)]
-            [points.extend([m.x, m.y]) for m in marks]
-            data.append(points)
+            if marks and save_data:
+                points = [str(path)]
+                [points.extend([m.x, m.y]) for m in marks]
+                data.append(points)
 
-        df = pd.DataFrame(data)
+            print(path, marks)
 
-        if args.output_format == "csv":
-            df.to_csv(args.output)
-        elif args.output_format == "json":
-            df.to_json(args.output)
-        else:
-            raise Exception(f"Invalid output format: {args.output_format}")
+        if save_data:
+            df = pd.DataFrame(data)
+
+            if args.output_format == "csv":
+                df.to_csv(args.output)
+            elif args.output_format == "json":
+                df.to_json(args.output)
+            else:
+                raise Exception(f"Invalid output format: {args.output_format}")
 
     elif args.command == "pose":
         from facetool.poser import Poser
