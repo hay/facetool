@@ -13,6 +13,7 @@ import pandas as pd
 import pdb
 
 COMMANDS = (
+    "average",
     "classify",
     "combineframes",
     "count",
@@ -224,6 +225,17 @@ def main(args):
 
         if args.output_format == "csv":
             classifier.to_csv(args.output)
+
+    elif args.command == "average":
+        from facetool.averager import Averager
+
+        profiler.tick("start averaging")
+
+        averager = Averager()
+
+        averager.average(args.input, args.output)
+
+        profiler.tick("done averaging")
 
     elif args.command == "swap":
         from facetool.swapper import Swapper
