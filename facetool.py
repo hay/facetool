@@ -289,7 +289,9 @@ def main(args):
 
         profiler.tick("start averaging")
 
-        averager = Averager()
+        averager = Averager(
+            predictor_path = args.predictor_path
+        )
 
         averager.average(args.input, args.output)
 
