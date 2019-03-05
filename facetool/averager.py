@@ -136,6 +136,8 @@ class Averager:
         # Divide by numImages to get average
         output = output / numImages
 
+        logging.debug(f"Saving image as {output_file}")
+
         # Convert back to regular RGB
         output = output * 255
         cv2.imwrite(output_file, output)
