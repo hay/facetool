@@ -62,7 +62,7 @@ class Detect:
         if output:
             logging.debug(f"Writing bounding boxes to {output}")
 
-            out = cv2.imread(image, cv2.IMREAD_COLOR)
+            out = cv2.imread(str(image), cv2.IMREAD_COLOR)
 
             for rect in rects:
                 logging.debug(f"Plotting rect: {rect}")
