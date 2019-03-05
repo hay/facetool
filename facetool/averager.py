@@ -5,20 +5,15 @@ import cv2
 import logging
 import numpy as np
 import pdb
-from .constants import DEFAULT_IMAGE_WIDTH, DEFAULT_IMAGE_HEIGHT
-from .faceaverage import similarityTransform, rectContains, calculateDelaunayTriangles
-from .faceaverage import constrainPoint, applyAffineTransform, warpTriangle
+from .faceaverage import similarityTransform, calculateDelaunayTriangles
+from .faceaverage import constrainPoint, warpTriangle
 from .landmarks import Landmarks
 from .path import Path
 
 logger = logging.getLogger(__name__)
 
 class Averager:
-    def __init__(self,
-        predictor_path,
-        img_width = DEFAULT_IMAGE_WIDTH,
-        img_height = DEFAULT_IMAGE_HEIGHT
-    ):
+    def __init__(self, predictor_path, img_width, img_height):
         self.predictor_path = predictor_path
         self.landmarks = Landmarks(self.predictor_path)
         self.img_width = img_width
@@ -74,9 +69,8 @@ class Averager:
 
         numImages = len(images)
 
-        # Warp images and trasnform landmarks to output coordinate system,
+        # Warp images and transform landmarks to output coordinate system,
         # and find average of transformed landmarks.
-
         for i in range(0, numImages):
 
             points1 = allPoints[i]
@@ -105,8 +99,6 @@ class Averager:
 
             pointsNorm.append(points)
             imagesNorm.append(img)
-
-
 
         # Delaunay triangulation
         rect = (0, 0, w, h)
@@ -144,6 +136,6 @@ class Averager:
         # Divide by numImages to get average
         output = output / numImages
 
-        # Display result
-        cv2.imshow('image', output)
-        cv2.waitKey(0)
+        # Convert back to regular RGB
+        output = output * 255
+        cv2.imwrite(output_file, output)

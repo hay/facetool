@@ -71,6 +71,14 @@ def get_parser():
         default = FEATHER_AMOUNT,
         help = "Softness of edges on a swapped face"
     )
+    parser.add_argument("-ih", "--image-height", type = int,
+        default = DEFAULT_IMAGE_HEIGHT,
+        help = "Height of output image / height"
+    )
+    parser.add_argument("-iw", "--image-width", type = int,
+        default = DEFAULT_IMAGE_WIDTH,
+        help = "Width of output image / video"
+    )
     parser.add_argument("-kt", "--keep-temp", action = "store_true",
         help = "Keep temporary files (used with video swapping"
     )
@@ -95,7 +103,6 @@ def get_parser():
     parser.add_argument("-vv", "--extra-verbose", action = "store_true",
         help = "Show debug information AND raise / abort on exceptions"
     )
-
     return parser
 
 def main(args):
@@ -290,7 +297,9 @@ def main(args):
         profiler.tick("start averaging")
 
         averager = Averager(
-            predictor_path = args.predictor_path
+            predictor_path = args.predictor_path,
+            img_height = args.image_height,
+            img_width = args.image_width
         )
 
         averager.average(args.input, args.output)
