@@ -23,7 +23,12 @@ class Averager:
         logging.debug(f"Reading image {path}")
 
         img = cv2.imread(str(path))
+
+        if not isinstance(img, np.ndarray):
+            return False
+
         img = np.float32(img) / 255.0
+
         return img
 
     def average(self, input_dir, output_file):
@@ -36,11 +41,31 @@ class Averager:
         allPoints = []
 
         for imgpath in Path(input_dir).images():
-            images.append(self._read_image(imgpath))
-
             # Convert from dlib points to regular points
-            imgPoints = self.landmarks.get_landmarks(imgpath)
-            allPoints.append([[p.x, p.y] for p in imgPoints])
+            try:
+                imgPoints = self.landmarks.get_landmarks(imgpath)
+            except:
+                logging.debug("Landmark detection error")
+                imgPoints = False
+
+            # Make sure we actually have a face
+            if not imgPoints:
+                logging.debug(f"{imgpath} does not have a face, skipping")
+                continue
+
+            imgPoints = [[p.x, p.y] for p in imgPoints]
+
+            # And make sure we can actually read the file
+            imageData = self._read_image(imgpath)
+
+            if isinstance(imageData, bool) and imageData == False:
+                logging.debug(f"Can't read {imgpath} skipping")
+
+            logging.debug("Detected landmarks and loaded image, adding")
+            allPoints.append(imgPoints)
+            images.append(imageData)
+
+        logging.debug("Loaded all images, now averaging")
 
         # For easy reference
         w = self.img_width
