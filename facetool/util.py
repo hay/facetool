@@ -4,7 +4,11 @@ import logging
 from . import config
 from .faceswap import TooManyFaces, NoFaces
 from glob import glob
+from collections import namedtuple
 logger = logging.getLogger(__name__)
+
+Coord = namedtuple("Coord", "x y w h")
+Point = namedtuple("Point", "x y")
 
 def mkdir_if_not_exists(path):
     if not os.path.isdir(path):
@@ -59,3 +63,15 @@ def numberize_files(path):
         newpath = f"{path}/{str(index).zfill(4)}.jpg"
         logger.debug(f"Renaming {oldpath} to {newpath}")
         os.rename(oldpath, newpath)
+
+def rect_to_bb(rect):
+    # take a bounding predicted by dlib and convert it
+    # to the format (x, y, w, h) as we would normally do
+    # with OpenCV
+    x = rect.left()
+    y = rect.top()
+    w = rect.right() - x
+    h = rect.bottom() - y
+
+    # return a tuple of (x, y, w, h)
+    return Coord(x, y, w, h)

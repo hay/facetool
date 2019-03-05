@@ -19,6 +19,7 @@ COMMANDS = (
     "count",
     "crop",
     "extractframes",
+    "landmarks",
     "locate",
     "pose",
     "probe",
@@ -27,7 +28,8 @@ COMMANDS = (
 
 OUTPUT_FORMAT_CHOICES = (
     "default",
-    "csv"
+    "csv",
+    "json"
 )
 
 logger = logging.getLogger(__name__)
@@ -129,6 +131,59 @@ def main(args):
         jsondata = json.dumps(data, indent = 4)
         print(jsondata)
 
+    elif args.command == "landmarks":
+        from facetool.landmarks import Landmarks
+
+        landmarks = Landmarks(predictor_path = args.predictor_path)
+
+        save_data = args.output_format and args.output_format != "default"
+
+        if save_data:
+            data = []
+
+        # Check if we *could* have an output directory, and if so,
+        # create it
+        if args.output and Path(args.output).could_be_dir():
+            Path(args.output).mkdir_if_not_exists()
+
+        for pathobj in Path(args.input).images():
+            path = str(pathobj)
+            logging.debug(f"Processing {path}")
+
+            print(f"Getting landmarks of {path}")
+
+            if not args.output:
+                outpath = None
+            else:
+                out = Path(args.output)
+
+                if out.is_dir():
+                    outpath = f"{out}/{Path(path).name}"
+                else:
+                    outpath = str(out)
+
+            try:
+                marks = landmarks.get_landmarks(str(path), outpath = outpath)
+            except Exception as e:
+                util.handle_exception(e, reraise = args.extra_verbose)
+
+            if marks and save_data:
+                points = [str(path)]
+                [points.extend([m.x, m.y]) for m in marks]
+                data.append(points)
+
+            print(path, marks)
+
+        if save_data:
+            df = pd.DataFrame(data)
+
+            if args.output_format == "csv":
+                df.to_csv(args.output)
+            elif args.output_format == "json":
+                df.to_json(args.output)
+            else:
+                raise Exception(f"Invalid output format: {args.output_format}")
+
     elif args.command == "pose":
         from facetool.poser import Poser
 
@@ -149,12 +204,15 @@ def main(args):
                 out = Path(args.output)
 
                 if out.is_dir():
-
                     outpath = f"{out}/{Path(path).name}"
                 else:
                     outpath = str(out)
 
-            poses = poser.get_poses(path, outpath = outpath)
+            try:
+                poses = poser.get_poses(path, outpath = outpath)
+            except Exception as e:
+                util.handle_exception(e, reraise = args.extra_verbose)
+
             print(f"{path}: {poses}")
 
     elif args.command == "count":

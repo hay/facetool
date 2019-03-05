@@ -10,10 +10,13 @@ class Profiler:
         print(f"*** {self.name} ***")
         for e in self.events:
             label = e["label"]
-            diff = e["diff"]
-            print(f"[{self.name}:{label}] {round(diff, 2)}")
+            diff = round(e["diff"], 2)
+            time_ = round(e["time"] - self._start, 2)
+            print(f"[{self.name}:{label}] {diff} ({time_})")
 
     def start(self):
+        self._start = time()
+
         self.events.append({
             "label" : "start",
             "diff" : 0,
