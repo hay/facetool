@@ -48,3 +48,5 @@ exec "Swap image to video" "swap -i test/img-single/1.jpg -t test/video/1.mp4 -o
 exec "Swap video to video" "swap -i test/video/1.mp4 -t test/video/2.mp4 -o test/output/swap-video-to-video.mp4"
 
 exec "Classify faces" "classify -i test/img-single -of csv -o test/output/classify.csv"
+
+exec "Averaging faces" "average -i test/img-single -o test/output/avgface.jpg"
