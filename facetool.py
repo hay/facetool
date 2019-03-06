@@ -11,6 +11,7 @@ import json
 import os
 import pandas as pd
 import pdb
+import shutil
 
 COMMANDS = (
     "average",
@@ -157,7 +158,7 @@ def main(args):
             path = str(pathobj)
             logging.debug(f"Processing {path}")
 
-            print(f"Getting landmarks of {path}")
+            logging.debug(f"Getting landmarks of {path}")
 
             if not args.output:
                 outpath = None
@@ -264,7 +265,7 @@ def main(args):
         detect = Detect()
 
         for path in Path(args.input).images():
-            print(f"Cropping <{path}>")
+            logging.debug(f"Cropping <{path}>")
 
             try:
                 detect.crop(str(path), args.output)
@@ -281,7 +282,7 @@ def main(args):
         )
 
         for path in Path(args.input).images():
-            print(f"Classifying <{path}>")
+            logging.debug(f"Classifying <{path}>")
 
             try:
                 classifier.classify(str(path))
@@ -302,7 +303,31 @@ def main(args):
             img_width = args.image_width
         )
 
-        averager.average(args.input, args.output)
+        # If the input is an image, extract all faces and average those
+        if Path(args.input).is_file():
+            # First create a temporary directory
+            TMP_DIR = "average-tmp"
+            util.mkdir_if_not_exists(TMP_DIR)
+
+            # Now extract all the images to said directory
+            from facetool.detect import Detect
+
+            detect = Detect()
+
+            logging.debug(f"Cropping <{args.input}> to {TMP_DIR}")
+            detect.crop(str(args.input), TMP_DIR)
+
+            # Average the stuff
+            averager.average(TMP_DIR, args.output)
+
+            # And remove the temporary directory
+            logging.debug(f"Removing {TMP_DIR}")
+            shutil.rmtree(TMP_DIR)
+        elif Path(args.input).is_dir():
+            # Just a directory, use this
+            averager.average(args.input, args.output)
+        else:
+            raise Exception("Invalid input for averaging")
 
         profiler.tick("done averaging")
 
