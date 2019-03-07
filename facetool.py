@@ -18,13 +18,13 @@ COMMANDS = (
     "classify",
     "combineframes",
     "count",
+    "distance",
     "crop",
     "extractframes",
     "landmarks",
     "locate",
     "pose",
     "probe",
-    "recognize",
     "swap",
 )
 
@@ -58,6 +58,9 @@ def get_parser():
     )
 
     # Extra arguments
+    parser.add_argument("--as-percentage", action = "store_true",
+        help = "Show face distances as percentages"
+    )
     parser.add_argument("-bl", "--blur", type = float,
         default = BLUR_AMOUNT,
         help = "Amount of blur to use during colour correction"
@@ -332,7 +335,7 @@ def main(args):
 
         profiler.tick("done averaging")
 
-    elif args.command == "recognize":
+    elif args.command == "distance":
         from facetool.recognizer import Recognizer
 
         if not args.input or not args.target:
@@ -344,7 +347,8 @@ def main(args):
 
         results = recognizer.recognize(
             input_path = args.input,
-            target_path = args.target
+            target_path = args.target,
+            as_percentage = args.as_percentage
         )
 
         if args.output_format == "csv":

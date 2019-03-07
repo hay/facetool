@@ -1,14 +1,28 @@
 import face_recognition
 import logging
+import math
+from .constants import DEFAULT_TRESHOLD
 from .path import Path
 
 logger = logging.getLogger(__name__)
 
 class Recognizer:
-    def __init__(self):
-        pass
+    def __init__(self, treshold = DEFAULT_TRESHOLD):
+        self.treshold = DEFAULT_TRESHOLD
 
-    def recognize(self, input_path, target_path):
+    # From:
+    # < https://github.com/ageitgey/face_recognition/wiki/Calculating-Accuracy-as-a-Percentage >
+    def _face_distance_to_conf(self, face_distance):
+        if face_distance > self.treshold:
+            range_ = (1.0 - self.treshold)
+            linear_val = (1.0 - face_distance) / (range_ * 2.0)
+            return linear_val
+        else:
+            range_ = self.treshold
+            linear_val = 1.0 - (face_distance / (range_ * 2.0))
+            return linear_val + ((1.0 - linear_val) * math.pow((linear_val - 0.5) * 2, 0.2))
+
+    def recognize(self, input_path, target_path, as_percentage = False):
         # First get the encoding for the input image and check if we
         # have only one face
         logging.debug(f"Getting encoding for input image {input_path}")
@@ -39,5 +53,9 @@ class Recognizer:
             encodings.append(image_encodings[0])
 
         results = face_recognition.face_distance(encodings, input_encoding)
+
+        if as_percentage:
+            logging.debug("Converting all face distances to percentages")
+            results = [self._face_distance_to_conf(d) for d in results]
 
         return dict(zip(image_paths, results))
