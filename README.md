@@ -1,12 +1,16 @@
 # facetool.py
-> Command line utility to manipulate and detect faces in videos and images, written in Python 3
+> Command line utility to manipulate, recognize and detect faces in videos and images, written in Python 3
 
 ![Facetool header logo](data/header.gif)
 
-This utility allows you to do all kinds of operations on face images and videos, straight from the command line:
+This utility allows you to do all kinds of operations on face images and videos, straight from the command line. Think of it as `ffmpeg` for faces.
+
+Some things `facetool` can do:
 * Face swapping
+* Face recognition
+* Create an average face
 * Counting faces
-* Cropping faces
+* Cropping faces (even multiple ones from a single image)
 * Extracting and combining frames from and to videos
 * Classifying faces based on age and gender
 
@@ -53,6 +57,30 @@ The other way around: apply the face of `face.jpg` to a directory of `heads` and
 
     facetool.py swap -i face.jpg -t heads -o face-to-dir
 
+### Face recognition
+
+Calculate the distance between 'alice.jpg' and a folder full of faces
+
+    facetool.py distance -i alice.jpg -t faces
+
+The same, but then print percentages instead of distance
+
+    facetool.py distance -i alice.jpg -t faces --as-percentage
+
+Save the results to a CSV file instead of printing to the command line
+
+    facetool.py distance -i alice.jpg -t faces --as-percentage -of csv -o results.csv
+
+### Face averaging
+
+Create an 'average.jpg' face from a folder of faces
+
+    facetool.py average -i faces -o average.jpg
+
+Do the same thing from a single image that has multiple faces
+
+    facetool.py average -i group.jpg -o average.jpg
+
 ### Classifying age and gender
 
 Get the age and gender of a single image and print to console
@@ -93,7 +121,7 @@ Create a new image called `face-pose.jpg` that shows the shapes and poses of `fa
 
     facetool.py pose -i face.jpg -o face-pose.jpg
 
-Crop all faces from `face.jpg` and save to new files in the directory `cropped`
+Crop all faces from `face.jpg` and save to new files in the directory `cropped`. This will also work with a single image with multiple faces.
 
     facetool.py crop -i face.jpg -o cropped
 
@@ -109,6 +137,11 @@ Convert a set of JPG files from the directory `frames` to a movie file called `m
 Return metadata about an image or video file in JSON format
 
     facetool.py probe -i movie.mp4
+
+## Troubleshooting
+Before opening an issue, try running your command with the `-v` (verbose) switch, because this will give you more debug information. When using `-vv` (extra verbose) `facetool` will abort the program on exceptions.
+
+Note that, by default, facetool doesn't stop at errors.
 
 ## All options
 
@@ -152,7 +185,6 @@ optional arguments:
 * More advanced swapping methods like 'deepfake' are not supported.
 * Even though you could use the library in your own scripts (instead of using the command line utility), this isn't very well supported yet.
 * No multithreading / processor support.
-* No face recognition support.
 * Operations on videos will remove the audio.
 
 ## Testing
