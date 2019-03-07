@@ -342,15 +342,16 @@ def main(args):
     elif args.command == "distance":
         from facetool.recognizer import Recognizer
 
-        if not args.input or not args.target:
-            raise Exception("For the recognizer you need an input and target")
+        if not all([args.input, any([args.target, args.model])]):
+            raise Exception("For the recognizer you need an input and target/model")
 
-        logging.debug(f"Trying to recognize {args.input} in {args.target}")
+        logging.debug(f"Trying to recognize {args.input} in {args.target}{args.model}")
 
         recognizer = Recognizer()
 
         results = recognizer.recognize(
             input_path = args.input,
+            model_path = args.model,
             target_path = args.target,
             as_percentage = args.as_percentage
         )

@@ -11,6 +11,22 @@ class Recognizer:
     def __init__(self, treshold = DEFAULT_TRESHOLD):
         self.treshold = DEFAULT_TRESHOLD
 
+    def _encode_image_path(self, path):
+        # First get encodings from all images in the target path
+        encodings = {}
+
+        image_paths = [str(p) for p in Path(path).images()]
+
+        for imgpath in image_paths:
+            try:
+                encoding = self._encoding_from_image(imgpath)
+            except:
+                continue
+
+            encodings[imgpath] = encoding
+
+        return encodings
+
     # From:
     # < https://github.com/ageitgey/face_recognition/wiki/Calculating-Accuracy-as-a-Percentage >
     def _face_distance_to_conf(self, face_distance):
@@ -54,7 +70,15 @@ class Recognizer:
             "encodings" : encodings
         })
 
-    def recognize(self, input_path, target_path, as_percentage = False):
+    def recognize(self,
+        input_path,
+        model_path = None,
+        target_path = None,
+        as_percentage = False
+    ):
+        if not any([model_path, target_path]):
+            raise Exception("Need either a model or a target path")
+
         # First get the encoding for the input image and check if we
         # have only one face
         logging.debug(f"Getting encoding for input image {input_path}")
@@ -67,20 +91,16 @@ class Recognizer:
             # Take the first face
             input_encoding = input_encoding[0]
 
-        # First get encodings from all images in the target path
-        encodings = []
+        # If we have a model path, load those encodings, otherwise we need
+        # to calculate the target encodings
+        if model_path:
+            with open(model_path) as f:
+                encodings = json.load(f)["encodings"]
+        elif target_path:
+            encodings = self._encode_image_path(target_path)
 
-        image_paths = [str(p) for p in Path(target_path).images()]
-
-        for imgpath in image_paths:
-            try:
-                encoding = self._encoding_from_image(imgpath)
-            except:
-                continue
-
-            encodings.append(encoding)
-
-        results = face_recognition.face_distance(encodings, input_encoding)
+        image_paths = list(encodings.keys())
+        results = face_recognition.face_distance(list(encodings.values()), input_encoding)
 
         if as_percentage:
             logging.debug("Converting all face distances to percentages")
