@@ -15,21 +15,33 @@ Some things `facetool` can do:
 * Classifying faces based on age and gender
 
 ## Installation
+In theory, this tool should work on any system that can run the required libraries (`dlib`, `opencv` and a couple of other ones), but in practice i've only tested it on MacOS.
 
 ### macOS
-I highly recommend using [`brew`](https://brew.sh/) to install all dependencies. You'll also need a working version of Python 3.6 and [`pipenv`](https://pipenv.readthedocs.io/en/latest/install/#installing-pipenv) (the latter is installable with `brew`). Given that you have Python 3.6 on your system this should be enough:
+I highly recommend using [`brew`](https://brew.sh/) to install all dependencies. You'll also need a working version of Python 3.6 or higher.
 
-1. Clone this repository:
+You can either use [`pipenv`](https://pipenv.readthedocs.io/en/latest/install/#installing-pipenv) (installable with `brew`) or install the required libraries globally using `pip`.
+
+Given that you have Python 3.6 on your system this should be enough:
+
+Clone this repository:
 ```bash
     git clone https://github.com/hay/facetool.git
 ```
-2. Install dependencies using `brew`:
+Install dependencies using `brew`:
 ```bash
     brew install cmake ffmpeg pipenv
 ```
-3. Run `pipenv install` in the root folder of tthe checked out folder. This might take a while!
-4. Run `pipenv shell`
-5. Try running the script by typing `./facetool.py`
+
+*When using `pipenv` (recommended)*
+
+Run `pipenv install` in the root folder of tthe checked out folder. This might take a while! Then run `pipenv shell`.
+
+*When using globally installed libraries*
+
+`pip3 install dlib numpy opencv-python ffmpeg-python scikit-image tqdm imutils tensorflow pandas face-recognition`
+
+After installing the libraries (either with or without `pipenv`) try running the script by typing `./facetool.py`.
 
 If that all works you can try some of the commands below.
 
@@ -144,18 +156,20 @@ Before opening an issue, try running your command with the `-v` (verbose) switch
 Note that, by default, facetool doesn't stop at errors.
 
 ## All options
+You'll get this output when running `facetool.py -h`.
 
 ```bash
-usage: facetool [-h] -i INPUT [-o OUTPUT] [-t TARGET] [-bl BLUR]
-                [-fr FRAMERATE] [-fa FEATHER] [-kt] [--no-eyesbrows]
-                [--no-nosemouth] [-pp PREDICTOR_PATH] [--profile] [-s] [-v]
-                [-vv]
-                [{combineframes,count,crop,extractframes,locate,pose,probe,swap}]
+usage: facetool.py [-h] -i INPUT [-o OUTPUT] [-t TARGET] [--as-percentage]
+                   [-bl BLUR] [-dd DATA_DIRECTORY] [-fr FRAMERATE]
+                   [-fa FEATHER] [-ih IMAGE_HEIGHT] [-iw IMAGE_WIDTH] [-kt]
+                   [--no-eyesbrows] [--no-nosemouth] [-of {default,csv,json}]
+                   [-pp PREDICTOR_PATH] [--profile] [-s] [-v] [-vv]
+                   [{average,classify,combineframes,count,distance,crop,extractframes,landmarks,locate,pose,probe,swap}]
 
 Manipulate faces in videos and images
 
 positional arguments:
-  {combineframes,count,crop,extractframes,locate,pose,probe,swap}
+  {average,classify,combineframes,count,distance,crop,extractframes,landmarks,locate,pose,probe,swap}
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -165,14 +179,23 @@ optional arguments:
                         Output file or folder
   -t TARGET, --target TARGET
                         'Head' when swapping
+  --as-percentage       Show face distances as percentages
   -bl BLUR, --blur BLUR
                         Amount of blur to use during colour correction
+  -dd DATA_DIRECTORY, --data-directory DATA_DIRECTORY
+                        Directory where the data files are located
   -fr FRAMERATE, --framerate FRAMERATE
   -fa FEATHER, --feather FEATHER
                         Softness of edges on a swapped face
+  -ih IMAGE_HEIGHT, --image-height IMAGE_HEIGHT
+                        Height of output image / height
+  -iw IMAGE_WIDTH, --image-width IMAGE_WIDTH
+                        Width of output image / video
   -kt, --keep-temp      Keep temporary files (used with video swapping
   --no-eyesbrows
   --no-nosemouth
+  -of {default,csv,json}, --output-format {default,csv,json}
+                        Specify output format
   -pp PREDICTOR_PATH, --predictor-path PREDICTOR_PATH
   --profile             Show profiler information
   -s, --swap            Swap input and target
