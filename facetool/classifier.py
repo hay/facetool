@@ -28,7 +28,7 @@ class Classifier:
                 "age" : data["ages"][0]
             })
 
-        print(data)
+        print(path, data)
 
     def to_csv(self, path):
         logging.debug("Saving csv")
