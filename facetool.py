@@ -24,6 +24,7 @@ COMMANDS = (
     "locate",
     "pose",
     "probe",
+    "recognize",
     "swap",
 )
 
@@ -116,7 +117,7 @@ def main(args):
     config.VERBOSE = args.verbose or args.extra_verbose
 
     # Check for invalid argument combinations
-    if args.output_format == "csv" and not args.output:
+    if any([args.output_format == "csv", args.output_format == "json"]) and not args.output:
         raise Exception("With CSV as output format, a filename (-o) is required")
 
     # Swap around input and target
@@ -330,6 +331,30 @@ def main(args):
             raise Exception("Invalid input for averaging")
 
         profiler.tick("done averaging")
+
+    elif args.command == "recognize":
+        from facetool.recognizer import Recognizer
+
+        if not args.input or not args.target:
+            raise Exception("For the recognizer you need an input and target")
+
+        logging.debug(f"Trying to recognize {args.input} in {args.target}")
+
+        recognizer = Recognizer()
+
+        results = recognizer.recognize(
+            input_path = args.input,
+            target_path = args.target
+        )
+
+        if args.output_format == "csv":
+            pd.DataFrame(results).to_csv(args.output)
+        elif args.output_format == "json":
+            pd.DataFrame(results).to_json(args.output)
+        else:
+            print(f"{args.input} distance to {args.target}")
+            for path, distance in results.items():
+                print(f"{path}: {distance}")
 
     elif args.command == "swap":
         from facetool.swapper import Swapper
