@@ -53,16 +53,18 @@ class Recognizer:
 
     def encode_path(self, path):
         encodings = {}
+        image_paths = [str(p) for p in Path(path).images()]
+        logging.debug(f"Encoding {len(image_paths)} images")
 
-        for image_path in Path(path).images():
-            image_path = str(image_path)
-
+        for image_path in image_paths:
             try:
                 encoding = self._encoding_from_image(image_path)
             except:
                 continue
 
             encodings[image_path] = encoding.tolist()
+
+        logging.debug(f"Encoded {len(encodings.values())} images")
 
         # Return encodings in a key, for future-proofing this file format
         # And return as JSON
@@ -106,4 +108,7 @@ class Recognizer:
             logging.debug("Converting all face distances to percentages")
             results = [self._face_distance_to_conf(d) for d in results]
 
-        return dict(zip(image_paths, results))
+        results = dict(zip(image_paths, results))
+
+        # Sort by value
+        return dict(sorted(results.items(), key = lambda x:x[1]))

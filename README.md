@@ -83,6 +83,14 @@ Save the results to a CSV file instead of printing to the command line
 
     facetool.py distance -i alice.jpg -t faces --as-percentage -of csv -o results.csv
 
+Encode a path of images and save the encodings to a file called `encodings.json`
+
+    facetool.py encode -i faces -o encodings.json
+
+Use the `encodings.json` file instead of recalculating all the encodings. Note the `-m` (model) switch.
+
+    facetool.py distance -i alice.jpg -m encodings.json
+
 ### Face averaging
 
 Create an 'average.jpg' face from a folder of faces

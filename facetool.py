@@ -357,9 +357,9 @@ def main(args):
         )
 
         if args.output_format == "csv":
-            pd.DataFrame(results).to_csv(args.output)
+            pd.Series(results).to_csv(args.output, header = False)
         elif args.output_format == "json":
-            pd.DataFrame(results).to_json(args.output)
+            pd.Series(results).to_json(args.output)
         else:
             print(f"{args.input} distance to {args.target}")
             for path, distance in results.items():
