@@ -20,6 +20,7 @@ COMMANDS = (
     "count",
     "distance",
     "crop",
+    "encode",
     "extractframes",
     "landmarks",
     "locate",
@@ -86,6 +87,9 @@ def get_parser():
     )
     parser.add_argument("-kt", "--keep-temp", action = "store_true",
         help = "Keep temporary files (used with video swapping"
+    )
+    parser.add_argument("-m", "--model", type = str,
+        help = "Use a precalculated model (for calculating distances)"
     )
     parser.add_argument("--no-eyesbrows", action = "store_true")
     parser.add_argument("--no-nosemouth", action = "store_true")
@@ -359,6 +363,20 @@ def main(args):
             print(f"{args.input} distance to {args.target}")
             for path, distance in results.items():
                 print(f"{path}: {distance}")
+
+    elif args.command == "encode":
+        from facetool.recognizer import Recognizer
+
+        if not all([args.input, args.output]):
+            raise Exception("For encoding faces you need both input and output")
+
+        recognizer = Recognizer()
+        encodings = recognizer.encode_path(args.input)
+
+        with open(args.output, "w") as f:
+            f.write(encodings)
+
+        print(f"Written encodings of {args.input} to {args.output}")
 
     elif args.command == "swap":
         from facetool.swapper import Swapper

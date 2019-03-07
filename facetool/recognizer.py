@@ -1,4 +1,5 @@
 import face_recognition
+import json
 import logging
 import math
 from .constants import DEFAULT_TRESHOLD
@@ -22,6 +23,37 @@ class Recognizer:
             linear_val = 1.0 - (face_distance / (range_ * 2.0))
             return linear_val + ((1.0 - linear_val) * math.pow((linear_val - 0.5) * 2, 0.2))
 
+    # Load one image, get the encoding and return that, but only if there
+    # is exactly *one* face
+    def _encoding_from_image(self, path):
+        logging.debug(f"Getting encoding for {path}")
+        image = face_recognition.load_image_file(path)
+        image_encodings = face_recognition.face_encodings(image)
+
+        if len(image_encodings) != 1:
+            raise Exception(f"{path} has 0 or more than 1 face, skipping")
+
+        return image_encodings[0]
+
+    def encode_path(self, path):
+        encodings = {}
+
+        for image_path in Path(path).images():
+            image_path = str(image_path)
+
+            try:
+                encoding = self._encoding_from_image(image_path)
+            except:
+                continue
+
+            encodings[image_path] = encoding.tolist()
+
+        # Return encodings in a key, for future-proofing this file format
+        # And return as JSON
+        return json.dumps({
+            "encodings" : encodings
+        })
+
     def recognize(self, input_path, target_path, as_percentage = False):
         # First get the encoding for the input image and check if we
         # have only one face
@@ -41,16 +73,12 @@ class Recognizer:
         image_paths = [str(p) for p in Path(target_path).images()]
 
         for imgpath in image_paths:
-            logging.debug(f"Getting encoding for {imgpath}")
-            image = face_recognition.load_image_file(imgpath)
-            image_encodings = face_recognition.face_encodings(image)
-
-            if len(image_encodings) != 1:
-                logging.debug(f"{imgpath} has 0 or more than 1 face, skipping")
+            try:
+                encoding = self._encoding_from_image(imgpath)
+            except:
                 continue
 
-            # Get the first encoding
-            encodings.append(image_encodings[0])
+            encodings.append(encoding)
 
         results = face_recognition.face_distance(encodings, input_encoding)
 
