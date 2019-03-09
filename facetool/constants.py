@@ -1,5 +1,5 @@
-from pathlib import Path
-path = Path(__file__)
+from pathlib import Path as OrigPath
+path = OrigPath(__file__)
 
 BLUR_AMOUNT = 0.6
 DATA_DIRECTORY = path.parent.parent.joinpath("data")
