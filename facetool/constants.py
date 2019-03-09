@@ -1,5 +1,8 @@
+from pathlib import Path
+path = Path(__file__)
+
 BLUR_AMOUNT = 0.6
-DATA_DIRECTORY = "./data"
+DATA_DIRECTORY = path.parent.parent.joinpath("data")
 DEFAULT_FRAMERATE = 30
 DEFAULT_IMAGE_WIDTH = 600
 DEFAULT_IMAGE_HEIGHT = 600
