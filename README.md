@@ -103,7 +103,7 @@ Do the same thing from a single image that has multiple faces
 
 Save 'original' and 'transformed' averaged faces as well
 
-    facetool.py average -i faces -o average.jpg --save-originals --save-transformed
+    facetool.py average -i faces -o average.jpg --save-originals --save-warped
 
 ### Classifying age and gender
 
@@ -176,7 +176,7 @@ usage: facetool.py [-h] -i INPUT [-o OUTPUT] [-t TARGET] [--as-percentage]
                    [-fa FEATHER] [-ih IMAGE_HEIGHT] [-iw IMAGE_WIDTH] [-kt]
                    [-m MODEL] [--no-eyesbrows] [--no-nosemouth]
                    [-of {default,csv,json}] [-pp PREDICTOR_PATH] [--profile]
-                   [-s] [--save-originals] [--save-transformed] [-v] [-vv]
+                   [-s] [--save-originals] [--save-warped] [-v] [-vv]
                    [{average,classify,combineframes,count,distance,crop,encode,extractframes,landmarks,locate,pose,probe,swap}]
 
 Manipulate faces in videos and images
@@ -215,7 +215,7 @@ optional arguments:
   --profile             Show profiler information
   -s, --swap            Swap input and target
   --save-originals      Save original images when averaging faces
-  --save-transformed    Save transformed images when averaging faces
+  --save-warped         Save warped images when averaging faces
   -v, --verbose         Show debug information
   -vv, --extra-verbose  Show debug information AND raise / abort on exceptions
 ```

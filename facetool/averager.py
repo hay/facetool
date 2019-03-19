@@ -15,13 +15,13 @@ logger = logging.getLogger(__name__)
 class Averager:
     def __init__(
         self, predictor_path, img_width, img_height,
-        save_transformed = False, save_originals = False
+        save_warped = False, save_originals = False
     ):
         self.predictor_path = predictor_path
         self.landmarks = Landmarks(self.predictor_path)
         self.img_width = img_width
         self.img_height = img_height
-        self.save_transformed = save_transformed
+        self.save_warped = save_warped
         self.save_originals = save_originals
 
     def _read_image(self, path):
@@ -168,10 +168,10 @@ class Averager:
                 cv2.imwrite(path, imagesNorm[i] * 255)
                 logging.debug(f"Saving original image {path}")
 
-            if self.save_transformed:
+            if self.save_warped:
                 path = f"{output_file_base}-{i}-warped.jpg"
                 cv2.imwrite(path, img * 255)
-                logging.debug(f"Saving transformed image {path}")
+                logging.debug(f"Saving warped image {path}")
 
             # Add image intensities for averaging
             output = output + img

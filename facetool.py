@@ -109,8 +109,8 @@ def get_parser():
     parser.add_argument("--save-originals", action = "store_true",
         help = "Save original images when averaging faces"
     )
-    parser.add_argument("--save-transformed", action = "store_true",
-        help = "Save transformed images when averaging faces"
+    parser.add_argument("--save-warped", action = "store_true",
+        help = "Save warped images when averaging faces"
     )
     parser.add_argument("-v", "--verbose", action = "store_true",
         help = "Show debug information"
@@ -316,7 +316,7 @@ def main(args):
             img_height = args.image_height,
             img_width = args.image_width,
             save_originals = args.save_originals,
-            save_transformed = args.save_transformed
+            save_warped = args.save_warped
         )
 
         # If the input is an image, extract all faces and average those
