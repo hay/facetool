@@ -106,6 +106,12 @@ def get_parser():
     parser.add_argument("-s", "--swap", action = "store_true",
         help = "Swap input and target"
     )
+    parser.add_argument("--save-originals", action = "store_true",
+        help = "Save original images when averaging faces"
+    )
+    parser.add_argument("--save-transformed", action = "store_true",
+        help = "Save transformed images when averaging faces"
+    )
     parser.add_argument("-v", "--verbose", action = "store_true",
         help = "Show debug information"
     )
@@ -308,7 +314,9 @@ def main(args):
         averager = Averager(
             predictor_path = args.predictor_path,
             img_height = args.image_height,
-            img_width = args.image_width
+            img_width = args.image_width,
+            save_originals = args.save_originals,
+            save_transformed = args.save_transformed
         )
 
         # If the input is an image, extract all faces and average those
