@@ -2,7 +2,7 @@
 import os
 import logging
 import pathlib
-from .constants import IMAGE_EXTENSIONS
+from .constants import IMAGE_EXTENSIONS, VIDEO_EXTENSIONS
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +24,13 @@ class Path(type(pathlib.Path())):
         for path in self.files():
             if path.suffix.lower() in IMAGE_EXTENSIONS:
                 yield path
+
+    # FIXME: these functions are *really* quick and dirty
+    def is_image(self):
+        return self.suffix.lower() in IMAGE_EXTENSIONS
+
+    def is_video(self):
+        return self.suffix.lower() in VIDEO_EXTENSIONS
 
     def mkdir_if_not_exists(self):
         if not self.is_dir():

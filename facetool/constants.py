@@ -10,3 +10,4 @@ DEFAULT_TRESHOLD = 0.6
 FEATHER_AMOUNT = 11
 IMAGE_EXTENSIONS = (".jpg", ".png")
 PREDICTOR_PATH = f"{DATA_DIRECTORY}/landmarks.dat"
+VIDEO_EXTENSIONS = (".mp4", ".mov", ".wmv", ".m4v")

@@ -101,6 +101,10 @@ Do the same thing from a single image that has multiple faces
 
     facetool.py average -i group.jpg -o average.jpg
 
+You can also average all faces in a video, which will give an interesting, ephemeral effect
+
+    facetool.py average -i face.mp4 -o average.jpg
+
 Save 'original' and 'transformed' averaged faces as well
 
     facetool.py average -i faces -o average.jpg --save-originals --save-warped

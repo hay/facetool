@@ -149,9 +149,13 @@ def main(args):
 
     # Show metadata on a media file
     elif args.command == "probe":
-        data = media.probe(args.input)
-        jsondata = json.dumps(data, indent = 4)
-        print(jsondata)
+        try:
+            data = media.probe(args.input)
+        except:
+            print(f"Could not probe '{args.input}', probably not a video/image file")
+        else:
+            jsondata = json.dumps(data, indent = 4)
+            print(jsondata)
 
     elif args.command == "landmarks":
         from facetool.landmarks import Landmarks
@@ -319,10 +323,25 @@ def main(args):
             save_warped = args.save_warped
         )
 
-        # If the input is an image, extract all faces and average those
-        if Path(args.input).is_file():
+        TMP_DIR = "average-tmp"
+        path = Path(args.input)
+
+        # If this is a video, extract all images and average those
+        if path.is_file() and path.is_video():
+            # First create a temporary directory to hold all frames
+            util.mkdir_if_not_exists(TMP_DIR)
+            media.extractframes(args.input, TMP_DIR)
+
+            # Now average
+            averager.average(TMP_DIR, args.output)
+
+            # And remove the temporary directory
+            logging.debug(f"Removing {TMP_DIR}")
+            shutil.rmtree(TMP_DIR)
+        # Not a video, so if it's a file it's probably an image
+        # extract all faces and average those
+        elif path.is_file():
             # First create a temporary directory
-            TMP_DIR = "average-tmp"
             util.mkdir_if_not_exists(TMP_DIR)
 
             # Now extract all the images to said directory
@@ -339,7 +358,7 @@ def main(args):
             # And remove the temporary directory
             logging.debug(f"Removing {TMP_DIR}")
             shutil.rmtree(TMP_DIR)
-        elif Path(args.input).is_dir():
+        elif path.is_dir():
             # Just a directory, use this
             averager.average(args.input, args.output)
         else:
