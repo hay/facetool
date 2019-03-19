@@ -101,6 +101,10 @@ Do the same thing from a single image that has multiple faces
 
     facetool.py average -i group.jpg -o average.jpg
 
+Save 'original' and 'transformed' averaged faces as well
+
+    facetool.py average -i faces -o average.jpg --save-originals --save-transformed
+
 ### Classifying age and gender
 
 Get the age and gender of a single image and print to console
@@ -159,9 +163,9 @@ Return metadata about an image or video file in JSON format
     facetool.py probe -i movie.mp4
 
 ## Troubleshooting
-Before opening an issue, try running your command with the `-v` (verbose) switch, because this will give you more debug information. When using `-vv` (extra verbose) `facetool` will abort the program on exceptions.
-
-Note that, by default, facetool doesn't stop at errors.
+* Before opening an issue, try running your command with the `-v` (verbose) switch, because this will give you more debug information. When using `-vv` (extra verbose) `facetool` will abort the program on exceptions.
+* Note that, by default, facetool doesn't stop at errors.
+* Documentation might be a bit lacking at times. I try to at least provide one image for every command line switch and option.
 
 ## All options
 You'll get this output when running `facetool.py -h`.
@@ -170,14 +174,15 @@ You'll get this output when running `facetool.py -h`.
 usage: facetool.py [-h] -i INPUT [-o OUTPUT] [-t TARGET] [--as-percentage]
                    [-bl BLUR] [-dd DATA_DIRECTORY] [-fr FRAMERATE]
                    [-fa FEATHER] [-ih IMAGE_HEIGHT] [-iw IMAGE_WIDTH] [-kt]
-                   [--no-eyesbrows] [--no-nosemouth] [-of {default,csv,json}]
-                   [-pp PREDICTOR_PATH] [--profile] [-s] [-v] [-vv]
-                   [{average,classify,combineframes,count,distance,crop,extractframes,landmarks,locate,pose,probe,swap}]
+                   [-m MODEL] [--no-eyesbrows] [--no-nosemouth]
+                   [-of {default,csv,json}] [-pp PREDICTOR_PATH] [--profile]
+                   [-s] [--save-originals] [--save-transformed] [-v] [-vv]
+                   [{average,classify,combineframes,count,distance,crop,encode,extractframes,landmarks,locate,pose,probe,swap}]
 
 Manipulate faces in videos and images
 
 positional arguments:
-  {average,classify,combineframes,count,distance,crop,extractframes,landmarks,locate,pose,probe,swap}
+  {average,classify,combineframes,count,distance,crop,encode,extractframes,landmarks,locate,pose,probe,swap}
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -200,6 +205,8 @@ optional arguments:
   -iw IMAGE_WIDTH, --image-width IMAGE_WIDTH
                         Width of output image / video
   -kt, --keep-temp      Keep temporary files (used with video swapping
+  -m MODEL, --model MODEL
+                        Use a precalculated model (for calculating distances)
   --no-eyesbrows
   --no-nosemouth
   -of {default,csv,json}, --output-format {default,csv,json}
@@ -207,6 +214,8 @@ optional arguments:
   -pp PREDICTOR_PATH, --predictor-path PREDICTOR_PATH
   --profile             Show profiler information
   -s, --swap            Swap input and target
+  --save-originals      Save original images when averaging faces
+  --save-transformed    Save transformed images when averaging faces
   -v, --verbose         Show debug information
   -vv, --extra-verbose  Show debug information AND raise / abort on exceptions
 ```
