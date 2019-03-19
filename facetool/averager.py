@@ -13,11 +13,16 @@ from .path import Path
 logger = logging.getLogger(__name__)
 
 class Averager:
-    def __init__(self, predictor_path, img_width, img_height):
+    def __init__(
+        self, predictor_path, img_width, img_height,
+        save_transformed = False, save_originals = False
+    ):
         self.predictor_path = predictor_path
         self.landmarks = Landmarks(self.predictor_path)
         self.img_width = img_width
         self.img_height = img_height
+        self.save_transformed = save_transformed
+        self.save_originals = save_originals
 
     def _read_image(self, path):
         logging.debug(f"Reading image {path}")
@@ -135,6 +140,7 @@ class Averager:
         # Warp input images to average image landmarks
         for i in range(0, len(imagesNorm)) :
             img = np.zeros((h,w,3), np.float32())
+
             # Transform triangles one by one
             for j in range(0, len(dt)) :
                 tin = []
@@ -153,6 +159,19 @@ class Averager:
 
                 warpTriangle(imagesNorm[i], img, tin, tout)
 
+            output_file_base = output_file.rsplit(".", 1)[0]
+
+            # Check if we also need to write the originals and/or the
+            # transformed versions
+            if self.save_originals:
+                path = f"{output_file_base}-{i}-original.jpg"
+                cv2.imwrite(path, imagesNorm[i] * 255)
+                logging.debug(f"Saving original image {path}")
+
+            if self.save_transformed:
+                path = f"{output_file_base}-{i}-warped.jpg"
+                cv2.imwrite(path, img * 255)
+                logging.debug(f"Saving transformed image {path}")
 
             # Add image intensities for averaging
             output = output + img
