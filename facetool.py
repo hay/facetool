@@ -210,7 +210,7 @@ def main(args):
             elif args.output_format == "json":
                 df.to_json(args.output)
             else:
-                raise Exception(f"Invalid output format: {args.output_format}")
+                raise ArgumentError(f"Invalid output format: {args.output_format}")
 
     elif args.command == "pose":
         from facetool.poser import Poser
@@ -271,7 +271,7 @@ def main(args):
         for path in Path(args.input).images():
             to_directory = os.path.isdir(args.input)
             locations = detect.locate(path, args.output, to_directory = to_directory)
-            message(locations)
+            message(f"Face locations in '{args.input}': {locations}")
 
     elif args.command == "crop":
         from facetool.detect import Detect
@@ -350,7 +350,7 @@ def main(args):
             # Just a directory, use this
             averager.average(args.input, args.output)
         else:
-            raise Exception("Invalid input for averaging")
+            raise ArgumentError("Invalid input for averaging")
 
         profiler.tick("done averaging")
 
@@ -358,7 +358,7 @@ def main(args):
         from facetool.recognizer import Recognizer
 
         if not all([args.input, any([args.target, args.model])]):
-            raise Exception("For the recognizer you need an input and target/model")
+            raise ArgumentError("For the recognizer you need an input and target/model")
 
         logging.debug(f"Trying to recognize {args.input} in {args.target}{args.model}")
 
@@ -384,7 +384,7 @@ def main(args):
         from facetool.recognizer import Recognizer
 
         if not all([args.input, args.output]):
-            raise Exception("For encoding faces you need both input and output")
+            raise ArgumentError("For encoding faces you need both input and output")
 
         recognizer = Recognizer()
         encodings = recognizer.encode_path(args.input)
@@ -402,11 +402,11 @@ def main(args):
         arguments = [args.input, args.target]
 
         if not all(arguments + [args.output]):
-            raise Exception("Input, target and output are required for swapping")
+            raise ArgumentError("Input, target and output are required for swapping")
 
         # And if these things are paths or files
         if not all([os.path.exists(a) for a in arguments]):
-            raise Exception("Input and target should be valid files or directories")
+            raise ArgumentError("Input and target should be valid files or directories")
 
         pbar = tqdm()
 
@@ -422,7 +422,6 @@ def main(args):
             predictor_path = args.predictor_path,
             feather = args.feather,
             blur = args.blur,
-            reraise_exceptions = args.extra_verbose,
             keep_temp = args.keep_temp,
             overlay_eyesbrows = not args.no_eyesbrows,
             overlay_nosemouth = not args.no_nosemouth,
@@ -456,7 +455,7 @@ def main(args):
         # I don't even know if there is an option that isn't in the list above,
         # but if it isn't, you'll get this
         else:
-            raise Exception("Invalid swap options")
+            raise ArgumentError("Invalid swap options")
 
         pbar.close()
         profiler.tick("done swapping")
@@ -467,7 +466,11 @@ def main(args):
 if __name__ == "__main__":
     parser = get_parser()
     args = parser.parse_args()
-    main(args)
+
+    try:
+        main(args)
+    except IsADirectoryError as e:
+        print(f"Can't use a directory as an argument: {e}")
 
     if config.PROFILE:
         profiler.dump_events()

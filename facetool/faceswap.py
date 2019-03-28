@@ -37,8 +37,11 @@ sourceforge:
 
 """
 
+from . import config
 from .constants import FEATHER_AMOUNT, BLUR_AMOUNT
 from .profiler import Profiler
+from .util import TooManyFacesError, NoFacesError
+
 profiler = Profiler("faceswap.py")
 
 import cv2
@@ -48,7 +51,6 @@ import sys
 import os
 import argparse
 import logging
-from . import config
 
 logger = logging.getLogger(__name__)
 
@@ -78,12 +80,6 @@ ALIGN_POINTS = (
     NOSE_POINTS +
     MOUTH_POINTS
 )
-
-class TooManyFaces(Exception):
-    pass
-
-class NoFaces(Exception):
-    pass
 
 class Faceswap:
     def __init__(self,
@@ -123,9 +119,9 @@ class Faceswap:
         profiler.tick("end_detector")
 
         if len(rects) > 1:
-            raise TooManyFaces
+            raise TooManyFacesError
         if len(rects) == 0:
-            raise NoFaces
+            raise NoFacesError
 
         landmarks = numpy.matrix([[p.x, p.y] for p in self.predictor(im, rects[0]).parts()])
 

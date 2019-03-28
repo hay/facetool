@@ -29,7 +29,7 @@ exec "Crop faces (directory)" "crop -i test/img-single -o test/output/crop-folde
 
 exec "Locate faces (image)" "locate -i test/img-single/1.jpg"
 
-exec "Face distance (image to dir)" "distance -i test/img-recognize/obama -t test/img-recognize/trump/trump.jpg"
+exec "Face distance (image to dir)" "distance -t test/img-recognize/obama -i test/img-recognize/trump/trump.jpg"
 
 exec "Pose face (image)" "pose -i test/img-single/1.jpg -o test/output/pose-image.jpg"
 

@@ -4,6 +4,7 @@ import logging
 import math
 from .constants import DEFAULT_TRESHOLD
 from .path import Path
+from .util import ArgumentError, FaceError
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +48,7 @@ class Recognizer:
         image_encodings = face_recognition.face_encodings(image)
 
         if len(image_encodings) != 1:
-            raise Exception(f"{path} has 0 or more than 1 face, skipping")
+            raise FaceError(f"{path} has 0 or more than 1 face, skipping")
 
         return image_encodings[0]
 
@@ -79,7 +80,7 @@ class Recognizer:
         as_percentage = False
     ):
         if not any([model_path, target_path]):
-            raise Exception("Need either a model or a target path")
+            raise ArgumentError("Need either a model or a target path")
 
         # First get the encoding for the input image and check if we
         # have only one face
@@ -88,7 +89,7 @@ class Recognizer:
         input_encoding = face_recognition.face_encodings(input_image)
 
         if len(input_encoding) != 1:
-            raise Exception("Found more than one face in this image, aborting")
+            raise FaceError("Found more than one face in this image, aborting")
         else:
             # Take the first face
             input_encoding = input_encoding[0]

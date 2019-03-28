@@ -12,6 +12,15 @@ Point = namedtuple("Point", "x y")
 class ArgumentError(Exception):
     pass
 
+class FaceError(Exception):
+    pass
+
+class TooManyFacesError(FaceError):
+    pass
+
+class NoFacesError(FaceError):
+    pass
+
 def message(*args):
     if not config.QUIET:
         print(*args)
