@@ -85,7 +85,6 @@ class TooManyFaces(Exception):
 class NoFaces(Exception):
     pass
 
-
 class Faceswap:
     def __init__(self,
         predictor_path,

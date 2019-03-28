@@ -1,3 +1,4 @@
 CACHE_LANDMARKS = True
 PROFILE = False
+QUIET = False
 VERBOSE = False

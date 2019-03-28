@@ -1,4 +1,5 @@
 from time import time
+from .util import message
 
 class Profiler:
     def __init__(self, name):
@@ -7,12 +8,13 @@ class Profiler:
         self.start()
 
     def dump_events(self):
-        print(f"*** {self.name} ***")
+        message(f"*** {self.name} ***")
+
         for e in self.events:
             label = e["label"]
             diff = round(e["diff"], 2)
             time_ = round(e["time"] - self._start, 2)
-            print(f"[{self.name}:{label}] {diff} ({time_})")
+            message(f"[{self.name}:{label}] {diff} ({time_})")
 
     def start(self):
         self._start = time()

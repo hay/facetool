@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 from facetool import config, media, util
+from facetool.constants import *
 from facetool.path import Path
 from facetool.profiler import Profiler
-from facetool.constants import *
+from facetool.util import ArgumentError, message
 
 from tqdm import tqdm
 import argparse
@@ -103,6 +104,9 @@ def get_parser():
     parser.add_argument("--profile", action = "store_true",
         help = "Show profiler information"
     )
+    parser.add_argument("-q", "--quiet", action = "store_true",
+        help = "Don't print output to the console"
+    )
     parser.add_argument("-s", "--swap", action = "store_true",
         help = "Swap input and target"
     )
@@ -127,11 +131,12 @@ def main(args):
     logging.debug(args)
 
     config.PROFILE = args.profile
+    config.QUIET = args.quiet
     config.VERBOSE = args.verbose or args.extra_verbose
 
     # Check for invalid argument combinations
     if any([args.output_format == "csv", args.output_format == "json"]) and not args.output:
-        raise Exception("With CSV as output format, a filename (-o) is required")
+        raise ArgumentError("With CSV as output format, a filename (-o) is required")
 
     # Swap around input and target
     if args.swap:
@@ -152,10 +157,10 @@ def main(args):
         try:
             data = media.probe(args.input)
         except:
-            print(f"Could not probe '{args.input}', probably not a video/image file")
+            raise ArgumentError(f"Could not probe '{args.input}', probably not a video/image file")
         else:
             jsondata = json.dumps(data, indent = 4)
-            print(jsondata)
+            message(jsondata)
 
     elif args.command == "landmarks":
         from facetool.landmarks import Landmarks
@@ -188,17 +193,14 @@ def main(args):
                 else:
                     outpath = str(out)
 
-            try:
-                marks = landmarks.get_landmarks(str(path), outpath = outpath)
-            except Exception as e:
-                util.handle_exception(e, reraise = args.extra_verbose)
+            marks = landmarks.get_landmarks(str(path), outpath = outpath)
 
             if marks and save_data:
                 points = [str(path)]
                 [points.extend([m.x, m.y]) for m in marks]
                 data.append(points)
 
-            print(path, marks)
+            message(path, marks)
 
         if save_data:
             df = pd.DataFrame(data)
@@ -234,12 +236,9 @@ def main(args):
                 else:
                     outpath = str(out)
 
-            try:
-                poses = poser.get_poses(path, outpath = outpath)
-            except Exception as e:
-                util.handle_exception(e, reraise = args.extra_verbose)
+            poses = poser.get_poses(path, outpath = outpath)
 
-            print(f"{path}: {poses}")
+            message(f"{path}: {poses}")
 
     elif args.command == "count":
         from facetool.detect import Detect
@@ -250,12 +249,9 @@ def main(args):
             csv = []
 
         for path in Path(args.input).images():
-            try:
-                count = detect.count(path)
-            except Exception as e:
-                util.handle_exception(e, reraise = args.extra_verbose)
+            count = detect.count(path)
 
-            print(f"Number of faces in '{path}': {count}")
+            message(f"Number of faces in '{path}': {count}")
 
             if args.output_format == "csv":
                 csv.append({
@@ -275,7 +271,7 @@ def main(args):
         for path in Path(args.input).images():
             to_directory = os.path.isdir(args.input)
             locations = detect.locate(path, args.output, to_directory = to_directory)
-            print(locations)
+            message(locations)
 
     elif args.command == "crop":
         from facetool.detect import Detect
@@ -284,11 +280,7 @@ def main(args):
 
         for path in Path(args.input).images():
             logging.debug(f"Cropping <{path}>")
-
-            try:
-                detect.crop(str(path), args.output)
-            except Exception as e:
-                util.handle_exception(e, reraise = args.extra_verbose)
+            detect.crop(str(path), args.output)
 
     elif args.command == "classify":
         from facetool.classifier import Classifier
@@ -301,11 +293,7 @@ def main(args):
 
         for path in Path(args.input).images():
             logging.debug(f"Classifying <{path}>")
-
-            try:
-                classifier.classify(str(path))
-            except Exception as e:
-                util.handle_exception(e, reraise = args.extra_verbose)
+            classifier.classify(str(path))
 
         if args.output_format == "csv":
             classifier.to_csv(args.output)
@@ -388,9 +376,9 @@ def main(args):
         elif args.output_format == "json":
             pd.Series(results).to_json(args.output)
         else:
-            print(f"{args.input} distance to {args.target}")
+            message(f"{args.input} distance to {args.target}")
             for path, distance in results.items():
-                print(f"{path}: {distance}")
+                message(f"{path}: {distance}")
 
     elif args.command == "encode":
         from facetool.recognizer import Recognizer
@@ -404,7 +392,7 @@ def main(args):
         with open(args.output, "w") as f:
             f.write(encodings)
 
-        print(f"Written encodings of {args.input} to {args.output}")
+        message(f"Written encodings of {args.input} to {args.output}")
 
     elif args.command == "swap":
         from facetool.swapper import Swapper
@@ -479,11 +467,7 @@ def main(args):
 if __name__ == "__main__":
     parser = get_parser()
     args = parser.parse_args()
-
-    try:
-        main(args)
-    except Exception as e:
-        util.handle_exception(e, reraise = args.extra_verbose)
+    main(args)
 
     if config.PROFILE:
         profiler.dump_events()

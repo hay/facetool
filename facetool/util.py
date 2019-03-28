@@ -2,13 +2,19 @@ import os
 import shutil
 import logging
 from . import config
-from .faceswap import TooManyFaces, NoFaces
 from glob import glob
 from collections import namedtuple
 logger = logging.getLogger(__name__)
 
 Coord = namedtuple("Coord", "x y w h")
 Point = namedtuple("Point", "x y")
+
+class ArgumentError(Exception):
+    pass
+
+def message(*args):
+    if not config.QUIET:
+        print(*args)
 
 def mkdir_if_not_exists(path):
     if not os.path.isdir(path):
@@ -41,20 +47,6 @@ def globify(path):
 
         for f in files:
             yield f
-
-def handle_exception(e, reraise = False):
-    face_exception = isinstance(e, NoFaces) or isinstance(e, TooManyFaces)
-
-    if reraise and not face_exception:
-        raise(e)
-    else:
-        msg = str(e)
-
-        if not msg:
-            msg = e.__class__.__name__
-
-        if config.VERBOSE:
-            print(f"Error: {msg}")
 
 def numberize_files(path):
     files = sorted(list(glob(path + "/*")))

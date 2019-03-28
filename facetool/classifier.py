@@ -1,6 +1,8 @@
 from .classify import Classify
+from .util import message
 import logging
 import pandas as pd
+
 logger = logging.getLogger(__name__)
 
 class Classifier:
@@ -28,7 +30,7 @@ class Classifier:
                 "age" : data["ages"][0]
             })
 
-        print(path, data)
+        message(path, data)
 
     def to_csv(self, path):
         logging.debug("Saving csv")

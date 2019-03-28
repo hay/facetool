@@ -5,7 +5,7 @@ from .path import Path
 from .constants import FEATHER_AMOUNT, BLUR_AMOUNT
 from .faceswap import Faceswap
 from .media import is_image, is_video, extractframes, combineframes
-from .util import force_mkdir, get_basename, numberize_files, mkdir_if_not_exists, handle_exception
+from .util import force_mkdir, get_basename, numberize_files, mkdir_if_not_exists
 
 logger = logging.getLogger(__name__)
 
@@ -65,12 +65,8 @@ class Swapper:
     def _faceswap(self, head, face, out):
         msg = f"Faceswapping {face} on {head}, saving to {out}"
         self.last_message = msg
-
-        try:
-            self.swap.faceswap(head = str(head), face = str(face), output = str(out))
-            self.done = self.done + 1
-        except Exception as e:
-            handle_exception(e, reraise = self.reraise_exceptions)
+        self.swap.faceswap(head = str(head), face = str(face), output = str(out))
+        self.done = self.done + 1
 
         if self.reporthook:
             self.reporthook()
