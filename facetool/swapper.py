@@ -6,6 +6,7 @@ from .constants import FEATHER_AMOUNT, BLUR_AMOUNT
 from .faceswap import Faceswap
 from .media import is_image, is_video, extractframes, combineframes
 from .util import force_mkdir, get_basename, numberize_files, mkdir_if_not_exists
+from .util import TooManyFacesError, NoFacesError, message
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +66,14 @@ class Swapper:
     def _faceswap(self, head, face, out):
         msg = f"Faceswapping {face} on {head}, saving to {out}"
         self.last_message = msg
-        self.swap.faceswap(head = str(head), face = str(face), output = str(out))
+
+        try:
+            self.swap.faceswap(head = str(head), face = str(face), output = str(out))
+        except TooManyFacesError:
+            message("Too many faces, could not swap")
+        except NoFacesError:
+            message("No faces found, could not swap")
+
         self.done = self.done + 1
 
         if self.reporthook:
