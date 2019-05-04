@@ -87,7 +87,7 @@ def get_parser():
         help = "Width of output image / video"
     )
     parser.add_argument("-kt", "--keep-temp", action = "store_true",
-        help = "Keep temporary files (used with video swapping"
+        help = "Keep temporary files (used with video swapping)"
     )
     parser.add_argument("-m", "--model", type = str,
         help = "Use a precalculated model (for calculating distances)"
