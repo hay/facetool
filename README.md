@@ -20,7 +20,7 @@ In theory, this tool should work on any system that can run the required librari
 ### macOS
 I highly recommend using [`brew`](https://brew.sh/) to install all dependencies. You'll also need a working version of Python 3.6 or higher.
 
-You can either use [`pipenv`](https://pipenv.readthedocs.io/en/latest/install/#installing-pipenv) (installable with `brew`) or install the required libraries globally using `pip`.
+You can either use [`poetry`](https://poetry.eustace.io/) or install the required libraries globally using `pip`.
 
 Given that you have Python 3.6 on your system this should be enough:
 
@@ -30,18 +30,18 @@ Clone this repository:
 ```
 Install dependencies using `brew`:
 ```bash
-    brew install cmake ffmpeg pipenv
+    brew install cmake ffmpeg
 ```
 
-*When using `pipenv` (recommended)*
+*When using `poetry` (recommended)*
 
-Run `pipenv install` in the root folder of tthe checked out folder. This might take a while! Then run `pipenv shell`.
+Run `poetry install` in the root folder of tthe checked out folder. This might take a while! Then run `poetry shell`.
 
 *When using globally installed libraries*
 
 `pip3 install dlib numpy opencv-python ffmpeg-python scikit-image tqdm imutils tensorflow pandas face-recognition`
 
-After installing the libraries (either with or without `pipenv`) try running the script by typing `./facetool.py`.
+After installing the libraries (either with or without `poetry`) try running the script by typing `./facetool.py`.
 
 If that all works you can try some of the commands below.
 
