@@ -36,6 +36,11 @@ OUTPUT_FORMAT_CHOICES = (
     "json"
 )
 
+SWAP_METHODS = [
+    "faceswap",
+    "faceswap3d"
+]
+
 logger = logging.getLogger(__name__)
 
 # Note that we always profile, we just don't print the output if the
@@ -116,11 +121,19 @@ def get_parser():
     parser.add_argument("--save-warped", action = "store_true",
         help = "Save warped images when averaging faces"
     )
+    parser.add_argument("--swap-method",
+        choices = SWAP_METHODS,
+        default = SWAP_METHODS[0],
+        help = f"Swap method for faceswap (options are: {SWAP_METHODS}"
+    )
     parser.add_argument("-v", "--verbose", action = "store_true",
         help = "Show debug information"
     )
     parser.add_argument("-vv", "--extra-verbose", action = "store_true",
         help = "Show debug information AND raise / abort on exceptions"
+    )
+    parser.add_argument("--warp-3d", action="store_true",
+        help = "Swap faces and morph to coordinates of target face"
     )
     return parser
 
@@ -425,7 +438,8 @@ def main(args):
             keep_temp = args.keep_temp,
             overlay_eyesbrows = not args.no_eyesbrows,
             overlay_nosemouth = not args.no_nosemouth,
-            reporthook = update_pbar
+            reporthook = update_pbar,
+            swap_method = args.swap_method
         )
 
         # Directory of faces to directory of heads

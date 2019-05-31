@@ -3,7 +3,6 @@ import shutil
 from glob import glob
 from .path import Path
 from .constants import FEATHER_AMOUNT, BLUR_AMOUNT
-from .faceswap import Faceswap
 from .media import is_image, is_video, extractframes, combineframes
 from .util import force_mkdir, get_basename, numberize_files, mkdir_if_not_exists
 from .util import TooManyFacesError, NoFacesError, message
@@ -17,15 +16,17 @@ IMG_TO_VIDEO = (HEAD_TMP, OUT_TMP)
 VIDEO_TO_VIDEO = (HEAD_TMP, OUT_TMP, FACE_TMP)
 
 class Swapper:
+
     def __init__(self,
         predictor_path,
         blur = BLUR_AMOUNT,
         feather = FEATHER_AMOUNT,
         keep_temp = False,
-        reraise_exceptions = False,
         overlay_eyesbrows = True,
         overlay_nosemouth = True,
-        reporthook = None
+        reporthook = None,
+        swap_method = "faceswap",
+        warp_3d = False
 
     ):
         self.done = 0
@@ -35,15 +36,27 @@ class Swapper:
         self.keep_temp = keep_temp
         self.blur = blur
         self.feather = feather
-        self.reraise_exceptions = reraise_exceptions
         self.reporthook = reporthook
-        self.swap = Faceswap(
-            predictor_path = self.predictor_path,
-            feather = self.feather,
-            blur = self.blur,
-            overlay_eyesbrows = overlay_eyesbrows,
-            overlay_nosemouth = overlay_nosemouth,
-        )
+        self.swap_method = swap_method
+        self.warp_3d = warp_3d
+
+        kwargs = {
+            "predictor_path" : self.predictor_path,
+            "feather" : self.feather,
+            "blur" : self.blur,
+            "overlay_eyesbrows" : overlay_eyesbrows,
+            "overlay_nosemouth" : overlay_nosemouth
+        }
+
+        logging.debug(f"Using swapmethod '{self.swap_method}'")
+
+        if self.swap_method == "faceswap":
+            from .faceswap import Faceswap
+            self.swap = Faceswap(**kwargs)
+        elif self.swap_method == "faceswap3d":
+            from .faceswap3d import Faceswap3d
+            kwargs["warp_3d"] = self.warp_3d
+            self.swap = Faceswap3d(**kwargs)
 
     # FIXME: this swap parameter is *really* confusing, let's fix that at
     # a later time

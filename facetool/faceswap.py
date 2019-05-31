@@ -87,8 +87,7 @@ class Faceswap:
         overlay_eyesbrows = True,
         overlay_nosemouth = True,
         feather = FEATHER_AMOUNT,
-        blur = BLUR_AMOUNT,
-        raise_exceptions = False
+        blur = BLUR_AMOUNT
     ):
         self.predictor_path = predictor_path
         self.blur = blur
