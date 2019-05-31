@@ -1,4 +1,5 @@
 # Code adapted from < https://github.com/wuhuikai/FaceSwap >
+from . import config
 from .constants import FEATHER_AMOUNT, BLUR_AMOUNT
 from .util import TooManyFacesError, NoFacesError
 
@@ -26,6 +27,7 @@ class Faceswap3d:
         self.warp_3d = warp_3d
         self.detector = dlib.get_frontal_face_detector()
         self.predictor = dlib.shape_predictor(self.predictor_path)
+        self.landmark_hashes = {}
 
     ## 3D Transform
     def _bilinear_interpolate(self, img, coords):
@@ -210,8 +212,16 @@ class Faceswap3d:
 
         return result_img
 
+    def _get_face_landmarks(self, im):
+        # This is by far the slowest part of the whole algorithm, so we
+        # cache the landmarks if the image is the same, especially when
+        # dealing with videos this makes things twice as fast
+        img_hash = str(abs(hash(im.data.tobytes())))
 
-    def _select_face(self, im, r = 10):
+        if config.CACHE_LANDMARKS and img_hash in self.landmark_hashes:
+            logging.debug("Landmarks are cached, return those")
+            return self.landmark_hashes[img_hash]
+
         faces = self.detector(im)
 
         if len(faces) > 1:
@@ -228,7 +238,13 @@ class Faceswap3d:
         # to a 2-tuple of (x, y)-coordinates
         points = np.asarray(list([p.x, p.y] for p in shape.parts()), dtype=np.int)
 
-        # points = np.asarray(self.face_points_detection(im, bbox))
+        # Save to image cache
+        self.landmark_hashes[img_hash] = points
+
+        return points
+
+    def _select_face(self, im, r = 10):
+        points = self._get_face_landmarks(im)
 
         im_w, im_h = im.shape[:2]
         left, top = np.min(points, 0)
@@ -238,7 +254,6 @@ class Faceswap3d:
         w, h = min(right+r, im_h)-x, min(bottom+r, im_w)-y
 
         return points - np.asarray([[x, y]]), (x, y, w, h), im[y:y+h, x:x+w]
-
 
     def faceswap(self, head, face, output):
         logger.debug(f"Faceswap {head} on {face} as {output}")
