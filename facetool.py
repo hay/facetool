@@ -439,7 +439,8 @@ def main(args):
             overlay_eyesbrows = not args.no_eyesbrows,
             overlay_nosemouth = not args.no_nosemouth,
             reporthook = update_pbar,
-            swap_method = args.swap_method
+            swap_method = args.swap_method,
+            warp_3d = args.warp_3d
         )
 
         # Directory of faces to directory of heads

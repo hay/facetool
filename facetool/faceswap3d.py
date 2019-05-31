@@ -28,7 +28,7 @@ class Faceswap3d:
         self.predictor = dlib.shape_predictor(self.predictor_path)
 
     ## 3D Transform
-    def bilinear_interpolate(self, img, coords):
+    def _bilinear_interpolate(self, img, coords):
         """ Interpolates over every image channel
         http://en.wikipedia.org/wiki/Bilinear_interpolation
         :param img: max 3 channel image
@@ -51,7 +51,7 @@ class Faceswap3d:
 
         return inter_pixel.T
 
-    def grid_coordinates(self, points):
+    def _grid_coordinates(self, points):
         """ x,y grid coordinates within the ROI of supplied points
         :param points: points to generate grid coordinates
         :returns: array of (x, y) coordinates
@@ -65,12 +65,13 @@ class Faceswap3d:
                            for x in range(xmin, xmax)], np.uint32)
 
 
-    def process_warp(self, src_img, result_img, tri_affines, dst_points, delaunay):
+    def _process_warp(self, src_img, result_img, tri_affines, dst_points, delaunay):
         """
         Warp each triangle from the src_image only within the
         ROI of the destination image (points in dst_points).
         """
-        roi_coords = self.grid_coordinates(dst_points)
+        roi_coords = self._grid_coordinates(dst_points)
+
         # indices to vertices. -1 if pixel is not in any triangle
         roi_tri_indices = delaunay.find_simplex(roi_coords)
 
@@ -80,12 +81,12 @@ class Faceswap3d:
             out_coords = np.dot(tri_affines[simplex_index],
                                 np.vstack((coords.T, np.ones(num_coords))))
             x, y = coords.T
-            result_img[y, x] = self.bilinear_interpolate(src_img, out_coords)
+            result_img[y, x] = self._bilinear_interpolate(src_img, out_coords)
 
         return None
 
 
-    def triangular_affine_matrices(self, vertices, src_points, dst_points):
+    def _triangular_affine_matrices(self, vertices, src_points, dst_points):
         """
         Calculate the affine transformation matrix for each
         triangle (x,y) vertex from dst_points to src_points
@@ -102,21 +103,20 @@ class Faceswap3d:
             yield mat
 
 
-    def warp_image_3d(self, src_img, src_points, dst_points, dst_shape, dtype=np.uint8):
+    def _warp_image_3d(self, src_img, src_points, dst_points, dst_shape, dtype=np.uint8):
         rows, cols = dst_shape[:2]
         result_img = np.zeros((rows, cols, 3), dtype=dtype)
 
         delaunay = spatial.Delaunay(dst_points)
-        tri_affines = np.asarray(list(self.triangular_affine_matrices(
+        tri_affines = np.asarray(list(self._triangular_affine_matrices(
             delaunay.simplices, src_points, dst_points)))
 
-        self.process_warp(src_img, result_img, tri_affines, dst_points, delaunay)
+        self._process_warp(src_img, result_img, tri_affines, dst_points, delaunay)
 
         return result_img
 
-
     ## 2D Transform
-    def transformation_from_points(self, points1, points2):
+    def _transformation_from_points(self, points1, points2):
         points1 = points1.astype(np.float64)
         points2 = points2.astype(np.float64)
 
@@ -138,7 +138,7 @@ class Faceswap3d:
                           np.array([[0., 0., 1.]])])
 
 
-    def warp_image_2d(self, im, M, dshape):
+    def _warp_image_2d(self, im, M, dshape):
         output_im = np.zeros(dshape, dtype=im.dtype)
         cv2.warpAffine(im,
                        M[:2],
@@ -151,7 +151,7 @@ class Faceswap3d:
 
 
     ## Generate Mask
-    def mask_from_points(self, size, points,erode_flag=1):
+    def _mask_from_points(self, size, points,erode_flag=1):
         radius = 10  # kernel size
         kernel = np.ones((radius, radius), np.uint8)
 
@@ -164,7 +164,7 @@ class Faceswap3d:
 
 
     ## Color Correction
-    def correct_colours(self, im1, im2, landmarks1):
+    def _correct_colours(self, im1, im2, landmarks1):
         COLOUR_CORRECT_BLUR_FRAC = 0.75
         LEFT_EYE_POINTS = list(range(42, 48))
         RIGHT_EYE_POINTS = list(range(36, 42))
@@ -189,19 +189,18 @@ class Faceswap3d:
 
 
     ## Copy-and-paste
-    def apply_mask(self, img, mask):
+    def _apply_mask(self, img, mask):
         """ Apply mask to supplied image
         :param img: max 3 channel image
         :param mask: [0-255] values in mask
         :returns: new image with mask applied
         """
-        masked_img=cv2.bitwise_and(img,img,mask=mask)
+        masked_img = cv2.bitwise_and(img,img,mask=mask)
 
         return masked_img
 
-
     ## Alpha blending
-    def alpha_feathering(self, src_img, dest_img, img_mask, blur_radius=15):
+    def _alpha_feathering(self, src_img, dest_img, img_mask, blur_radius=15):
         mask = cv2.blur(img_mask, (blur_radius, blur_radius))
         mask = mask / 255.0
 
@@ -212,15 +211,7 @@ class Faceswap3d:
         return result_img
 
 
-    def check_points(self, img,points):
-        # Todo: I just consider one situation.
-        if points[8,1]>img.shape[0]:
-            logging.error("Jaw part out of image")
-        else:
-            return True
-        return False
-
-    def select_face(self, im, r = 10):
+    def _select_face(self, im, r = 10):
         faces = self.detector(im)
 
         if len(faces) > 1:
@@ -256,10 +247,10 @@ class Faceswap3d:
         dst_img = cv2.imread(head)
 
         # Select src face
-        src_points, src_shape, src_face = self.select_face(src_img)
+        src_points, src_shape, src_face = self._select_face(src_img)
 
         # Select dst face
-        dst_points, dst_shape, dst_face = self.select_face(dst_img)
+        dst_points, dst_shape, dst_face = self._select_face(dst_img)
 
         h, w = dst_face.shape[:2]
 
@@ -267,35 +258,35 @@ class Faceswap3d:
         if self.warp_3d:
             logging.debug(f"Warping in 3d")
             ## 3d warp
-            warped_src_face = self.warp_image_3d(src_face, src_points[:48], dst_points[:48], (h, w))
+            warped_src_face = self._warp_image_3d(src_face, src_points[:48], dst_points[:48], (h, w))
         else:
             logging.debug(f"Warping in 2d")
             ## 2d warp
-            src_mask = self.mask_from_points(src_face.shape[:2], src_points)
-            src_face = self.apply_mask(src_face, src_mask)
+            src_mask = self._mask_from_points(src_face.shape[:2], src_points)
+            src_face = self._apply_mask(src_face, src_mask)
 
             # Correct Color for 2d warp
             if self.correct_color:
-                warped_dst_img = self.warp_image_3d(dst_face, dst_points[:48], src_points[:48], src_face.shape[:2])
-                src_face = self.correct_colours(warped_dst_img, src_face, src_points)
+                warped_dst_img = self._warp_image_3d(dst_face, dst_points[:48], src_points[:48], src_face.shape[:2])
+                src_face = self._correct_colours(warped_dst_img, src_face, src_points)
 
             # Warp
-            warped_src_face = self.warp_image_2d(
+            warped_src_face = self._warp_image_2d(
                 src_face,
-                self.transformation_from_points(dst_points, src_points),
+                self._transformation_from_points(dst_points, src_points),
                 (h, w, 3)
             )
 
         ## Mask for blending
-        mask = self.mask_from_points((h, w), dst_points)
+        mask = self._mask_from_points((h, w), dst_points)
         mask_src = np.mean(warped_src_face, axis=2) > 0
         mask = np.asarray(mask*mask_src, dtype=np.uint8)
 
         ## Correct color
         if self.warp_3d and self.correct_color:
-            warped_src_face = self.apply_mask(warped_src_face, mask)
-            dst_face_masked = self.apply_mask(dst_face, mask)
-            warped_src_face = self.correct_colours(dst_face_masked, warped_src_face, dst_points)
+            warped_src_face = self._apply_mask(warped_src_face, mask)
+            dst_face_masked = self._apply_mask(dst_face, mask)
+            warped_src_face = self._correct_colours(dst_face_masked, warped_src_face, dst_points)
 
         ## Shrink the mask
         kernel = np.ones((10, 10), np.uint8)
