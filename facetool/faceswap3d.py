@@ -295,7 +295,7 @@ class Faceswap3d:
         ## Mask for blending
         mask = self._mask_from_points((h, w), dst_points)
         mask_src = np.mean(warped_src_face, axis=2) > 0
-        mask = np.asarray(mask*mask_src, dtype=np.uint8)
+        mask = np.asarray(mask * mask_src, dtype=np.uint8)
 
         ## Correct color
         if self.warp_3d and self.correct_color:

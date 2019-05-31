@@ -36,11 +36,11 @@ TESTS = [
         "command" : "probe -i test/video/1.mp4"
     },
     {
-        "label" : "Swap: image to image",
+        "label" : "Swap image to image",
         "command" : "swap -i test/img-single/1.jpg -t test/img-single/3.jpg -o test/output/swap-image-to-image.jpg"
     },
     {
-        "label" : "Swap: image to dir",
+        "label" : "Swap image to dir",
         "command" : "swap -i test/img-single/1.jpg -t test/img-single -o test/output/swap-image-to-dir"
     },
     {
