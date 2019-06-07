@@ -129,6 +129,9 @@ def get_parser():
     parser.add_argument("-so", "--swap-order", type = str,
         help = "Comma-separated list with order of faceswaps on target, implies a multiswap"
     )
+    parser.add_argument("-sr", "--swap-order-repeat", action = "store_true", default = False,
+        help = "When using --swap-order and there are not enough target faces, repeat the sequence"
+    )
     parser.add_argument("-v", "--verbose", action = "store_true",
         help = "Show debug information"
     )
@@ -444,7 +447,8 @@ def main(args):
             reporthook = update_pbar,
             swap_method = args.swap_method,
             warp_3d = args.warp_3d,
-            swap_order = args.swap_order
+            swap_order = args.swap_order,
+            swap_order_repeat = args.swap_order_repeat
         )
 
         # Directory of faces to directory of heads

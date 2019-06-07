@@ -15,8 +15,21 @@ OUT_TMP = "out-tmp"
 IMG_TO_VIDEO = (HEAD_TMP, OUT_TMP)
 VIDEO_TO_VIDEO = (HEAD_TMP, OUT_TMP, FACE_TMP)
 
-class Swapper:
+def parse_swap_order(swap_order):
+    if swap_order == None:
+        return None
 
+    order = []
+
+    for item in swap_order.split(","):
+        if item == "x":
+            order.append(-1)
+        else:
+            order.append(int(item))
+
+    return order
+
+class Swapper:
     def __init__(self,
         predictor_path,
         blur = BLUR_AMOUNT,
@@ -27,8 +40,8 @@ class Swapper:
         reporthook = None,
         swap_method = "faceswap",
         warp_3d = False,
-        swap_order = None
-
+        swap_order = None,
+        swap_order_repeat = False
     ):
         self.done = 0
         self.filecount = None
@@ -40,7 +53,8 @@ class Swapper:
         self.reporthook = reporthook
         self.swap_method = swap_method
         self.warp_3d = warp_3d
-        self.swap_order = swap_order
+        self.swap_order = parse_swap_order(swap_order)
+        self.swap_order_repeat = swap_order_repeat
 
         kwargs = {
             "predictor_path" : self.predictor_path,
@@ -83,7 +97,13 @@ class Swapper:
         self.last_message = msg
 
         try:
-            self.swap.faceswap(head = str(head), face = str(face), output = str(out))
+            self.swap.faceswap(
+                head = str(head),
+                face = str(face),
+                output = str(out),
+                order = self.swap_order,
+                order_repeat = self.swap_order_repeat
+            )
         except TooManyFacesError:
             message(f"Too many faces, could not swap ({msg})")
         except NoFacesError:

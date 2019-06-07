@@ -159,16 +159,17 @@ class Faceswap:
             logging.debug("Landmarks are cached, return those")
             return self.landmark_hashes[img_hash]
 
-        profiler.tick("start_detector")
         rects = self.detector(im, 1)
-        profiler.tick("end_detector")
 
-        if len(rects) > 1:
-            raise TooManyFacesError
         if len(rects) == 0:
             raise NoFacesError
 
-        landmarks = numpy.matrix([[p.x, p.y] for p in self.predictor(im, rects[0]).parts()])
+        landmarks = []
+
+        for rect in rects:
+            landmarks.append(
+                numpy.matrix([[p.x, p.y] for p in self.predictor(im, rect).parts()])
+            )
 
         # Save to image cache
         self.landmark_hashes[img_hash] = landmarks
@@ -240,43 +241,59 @@ class Faceswap:
                        flags=cv2.WARP_INVERSE_MAP)
         return output_im
 
-    def faceswap(self, head, face, output):
-        profiler.tick("start faceswap")
+    def faceswap(self, head, face, output, order = None, order_repeat = False):
         logger.debug(f"Faceswap {head} on {face} as {output}")
+        logger.debug(f"Order: {order}")
 
         im1, landmarks1 = self._read_im_and_landmarks(head)
-        profiler.tick("_read_im_and_landmarks (head)")
         im2, landmarks2 = self._read_im_and_landmarks(face)
-        profiler.tick("_read_im_and_landmarks (face)")
 
-        M = self._transformation_from_points(
-            landmarks1[ALIGN_POINTS],
-            landmarks2[ALIGN_POINTS]
-        )
+        logger.debug(f"Landmarks found: head:{len(landmarks1)}, face:{len(landmarks2)}")
+        logger.debug(f"Repeat order? {order_repeat}")
 
-        profiler.tick("_transformation_from_points")
+        output_im = im1
 
-        mask = self._get_face_mask(im2, landmarks2)
-        profiler.tick("_get_face_mask")
+        for index1 in range(0, len(landmarks1)):
+            if order:
+                if order_repeat:
+                    # logger.debug(index1, len(landmarks2))
+                    index_lookup = index1 % len(order)
+                else:
+                    index_lookup = index1
 
-        warped_mask = self._warp_im(mask, M, im1.shape)
-        profiler.tick("_warp_im")
+                try:
+                    index2 = order[index_lookup]
+                except IndexError:
+                    print(f"Invalid index lookup, skipping face")
+                    continue
+            else:
+                index2 = index1
 
-        combined_mask = numpy.max([self._get_face_mask(im1, landmarks1), warped_mask],
-                                  axis=0)
-        profiler.tick("combined_mask")
+            logger.debug(f"Indexes {index1},{index2}")
 
-        warped_im2 = self._warp_im(im2, M, im1.shape)
-        profiler.tick("_warp_im")
+            if index2 == -1:
+                logger.debug(f"Not swapping this one, found -1")
+                continue
 
-        warped_corrected_im2 = self._correct_colours(im1, warped_im2, landmarks1)
-        profiler.tick("_correct_colours")
+            M = self._transformation_from_points(
+                landmarks1[index1][ALIGN_POINTS],
+                landmarks2[index2][ALIGN_POINTS]
+            )
 
-        output_im = im1 * (1.0 - combined_mask) + warped_corrected_im2 * combined_mask
-        profiler.tick("output_im")
+            mask = self._get_face_mask(im2, landmarks2[index2])
+            warped_mask = self._warp_im(mask, M, im1.shape)
+
+            combined_mask = numpy.max(
+                [self._get_face_mask(im1, landmarks1[index1]), warped_mask],
+                axis=0
+            )
+
+            warped_im2 = self._warp_im(im2, M, im1.shape)
+
+            warped_corrected_im2 = self._correct_colours(
+                im1, warped_im2, landmarks1[index1]
+            )
+
+            output_im = output_im * (1.0 - combined_mask) + warped_corrected_im2 * combined_mask
 
         cv2.imwrite(output, output_im)
-        profiler.tick("imwrite")
-
-        if config.PROFILE:
-            profiler.dump_events()
