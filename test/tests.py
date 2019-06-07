@@ -52,6 +52,14 @@ TESTS = [
         "command" : "swap -i test/img-single -t test/img-single -o test/output/swap-dir-to-dir"
     },
     {
+        "label" : "Swap group to group (faceswap)",
+        "command" : "swap -i test/img-group/1.jpg -t test/img-group/1.jpg -o test/output/group-faceswap.jpg -so 1,0"
+    },
+    {
+        "label" : "Swap single face to whole group",
+        "command" : "swap -i test/img-single/1.jpg -t test/img-group/2.jpg -o test/output/single-to-goup.jpg -so 0 -sr"
+    },
+    {
         "label" : "Swap image to video",
         "command" : "swap -i test/img-single/1.jpg -t test/video/1.mp4 -o test/output/swap-image-to-video.mp4"
     },
