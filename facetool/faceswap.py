@@ -114,6 +114,22 @@ class Faceswap:
             cv2.circle(im, pos, 3, color=(0, 255, 255))
         return im
 
+    def _correct_colours(self, im1, im2, landmarks1):
+        blur_amount = self.blur * numpy.linalg.norm(
+                                  numpy.mean(landmarks1[LEFT_EYE_POINTS], axis=0) -
+                                  numpy.mean(landmarks1[RIGHT_EYE_POINTS], axis=0))
+        blur_amount = int(blur_amount)
+        if blur_amount % 2 == 0:
+            blur_amount += 1
+        im1_blur = cv2.GaussianBlur(im1, (blur_amount, blur_amount), 0)
+        im2_blur = cv2.GaussianBlur(im2, (blur_amount, blur_amount), 0)
+
+        # Avoid divide-by-zero errors.
+        im2_blur += (128 * (im2_blur <= 1.0)).astype(im2_blur.dtype)
+
+        return (im2.astype(numpy.float64) * im1_blur.astype(numpy.float64) /
+                                                    im2_blur.astype(numpy.float64))
+
     def _draw_convex_hull(self, im, points, color):
         points = cv2.convexHull(points)
         cv2.fillConvexPoly(im, points, color=color)
@@ -159,6 +175,22 @@ class Faceswap:
 
         return landmarks
 
+    def _read_im_and_landmarks(self, fname):
+        logger.debug(f"Reading {fname} for landmarks")
+        profiler.tick("start _read_im_and_landmarks (imread)")
+        im = cv2.imread(fname, cv2.IMREAD_COLOR)
+        profiler.tick("end _read_im_and_landmarks (imread)")
+
+        im = cv2.resize(im, (im.shape[1] * SCALE_FACTOR,
+                             im.shape[0] * SCALE_FACTOR))
+
+        profiler.tick("_read_im_and_landmarks (resize)")
+
+        s = self._get_landmarks(im)
+        profiler.tick("_read_im_and_landmarks (_get_landmarks)")
+
+        return im, s
+
     def _transformation_from_points(self, points1, points2):
         """
         Return an affine transformation [s * R | T] such that:
@@ -198,22 +230,6 @@ class Faceswap:
                                            c2.T - (s2 / s1) * R * c1.T)),
                              numpy.matrix([0., 0., 1.])])
 
-    def _read_im_and_landmarks(self, fname):
-        logger.debug(f"Reading {fname} for landmarks")
-        profiler.tick("start _read_im_and_landmarks (imread)")
-        im = cv2.imread(fname, cv2.IMREAD_COLOR)
-        profiler.tick("end _read_im_and_landmarks (imread)")
-
-        im = cv2.resize(im, (im.shape[1] * SCALE_FACTOR,
-                             im.shape[0] * SCALE_FACTOR))
-
-        profiler.tick("_read_im_and_landmarks (resize)")
-
-        s = self._get_landmarks(im)
-        profiler.tick("_read_im_and_landmarks (_get_landmarks)")
-
-        return im, s
-
     def _warp_im(self, im, M, dshape):
         output_im = numpy.zeros(dshape, dtype=im.dtype)
         cv2.warpAffine(im,
@@ -223,22 +239,6 @@ class Faceswap:
                        borderMode=cv2.BORDER_TRANSPARENT,
                        flags=cv2.WARP_INVERSE_MAP)
         return output_im
-
-    def _correct_colours(self, im1, im2, landmarks1):
-        blur_amount = self.blur * numpy.linalg.norm(
-                                  numpy.mean(landmarks1[LEFT_EYE_POINTS], axis=0) -
-                                  numpy.mean(landmarks1[RIGHT_EYE_POINTS], axis=0))
-        blur_amount = int(blur_amount)
-        if blur_amount % 2 == 0:
-            blur_amount += 1
-        im1_blur = cv2.GaussianBlur(im1, (blur_amount, blur_amount), 0)
-        im2_blur = cv2.GaussianBlur(im2, (blur_amount, blur_amount), 0)
-
-        # Avoid divide-by-zero errors.
-        im2_blur += (128 * (im2_blur <= 1.0)).astype(im2_blur.dtype)
-
-        return (im2.astype(numpy.float64) * im1_blur.astype(numpy.float64) /
-                                                    im2_blur.astype(numpy.float64))
 
     def faceswap(self, head, face, output):
         profiler.tick("start faceswap")
