@@ -5,7 +5,7 @@ from .path import Path
 from .constants import FEATHER_AMOUNT, BLUR_AMOUNT
 from .media import is_image, is_video, extractframes, combineframes
 from .util import force_mkdir, get_basename, numberize_files, mkdir_if_not_exists
-from .util import TooManyFacesError, NoFacesError, message
+from .util import TooManyFacesError, NoFacesError, FaceError, message
 
 logger = logging.getLogger(__name__)
 
@@ -83,9 +83,11 @@ class Swapper:
         try:
             self.swap.faceswap(head = str(head), face = str(face), output = str(out))
         except TooManyFacesError:
-            message("Too many faces, could not swap")
+            message(f"Too many faces, could not swap ({msg})")
         except NoFacesError:
-            message("No faces found, could not swap")
+            message(f"No faces found, could not swap ({msg})")
+        except IndexError as e:
+            message(f"Index error: {e}, ({msg})")
 
         self.done = self.done + 1
 
