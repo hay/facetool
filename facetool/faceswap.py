@@ -103,32 +103,6 @@ class Faceswap:
         if overlay_nosemouth:
             self.overlay_points.append(NOSE_MOUTH_POINTS)
 
-    def _get_landmarks(self, im):
-        # This is by far the slowest part of the whole algorithm, so we
-        # cache the landmarks if the image is the same, especially when
-        # dealing with videos this makes things twice as fast
-        img_hash = str(abs(hash(im.data.tobytes())))
-
-        if config.CACHE_LANDMARKS and img_hash in self.landmark_hashes:
-            logging.debug("Landmarks are cached, return those")
-            return self.landmark_hashes[img_hash]
-
-        profiler.tick("start_detector")
-        rects = self.detector(im, 1)
-        profiler.tick("end_detector")
-
-        if len(rects) > 1:
-            raise TooManyFacesError
-        if len(rects) == 0:
-            raise NoFacesError
-
-        landmarks = numpy.matrix([[p.x, p.y] for p in self.predictor(im, rects[0]).parts()])
-
-        # Save to image cache
-        self.landmark_hashes[img_hash] = landmarks
-
-        return landmarks
-
     def _annotate_landmarks(self, im, landmarks):
         im = im.copy()
         for idx, point in enumerate(landmarks):
@@ -158,6 +132,32 @@ class Faceswap:
         im = cv2.GaussianBlur(im, (self.feather, self.feather), 0)
 
         return im
+
+    def _get_landmarks(self, im):
+        # This is by far the slowest part of the whole algorithm, so we
+        # cache the landmarks if the image is the same, especially when
+        # dealing with videos this makes things twice as fast
+        img_hash = str(abs(hash(im.data.tobytes())))
+
+        if config.CACHE_LANDMARKS and img_hash in self.landmark_hashes:
+            logging.debug("Landmarks are cached, return those")
+            return self.landmark_hashes[img_hash]
+
+        profiler.tick("start_detector")
+        rects = self.detector(im, 1)
+        profiler.tick("end_detector")
+
+        if len(rects) > 1:
+            raise TooManyFacesError
+        if len(rects) == 0:
+            raise NoFacesError
+
+        landmarks = numpy.matrix([[p.x, p.y] for p in self.predictor(im, rects[0]).parts()])
+
+        # Save to image cache
+        self.landmark_hashes[img_hash] = landmarks
+
+        return landmarks
 
     def _transformation_from_points(self, points1, points2):
         """
@@ -249,8 +249,10 @@ class Faceswap:
         im2, landmarks2 = self._read_im_and_landmarks(face)
         profiler.tick("_read_im_and_landmarks (face)")
 
-        M = self._transformation_from_points(landmarks1[ALIGN_POINTS],
-                                       landmarks2[ALIGN_POINTS])
+        M = self._transformation_from_points(
+            landmarks1[ALIGN_POINTS],
+            landmarks2[ALIGN_POINTS]
+        )
 
         profiler.tick("_transformation_from_points")
 

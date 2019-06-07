@@ -26,7 +26,8 @@ class Swapper:
         overlay_nosemouth = True,
         reporthook = None,
         swap_method = "faceswap",
-        warp_3d = False
+        warp_3d = False,
+        swap_order = None
 
     ):
         self.done = 0
@@ -39,6 +40,7 @@ class Swapper:
         self.reporthook = reporthook
         self.swap_method = swap_method
         self.warp_3d = warp_3d
+        self.swap_order = swap_order
 
         kwargs = {
             "predictor_path" : self.predictor_path,

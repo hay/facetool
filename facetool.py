@@ -126,6 +126,9 @@ def get_parser():
         default = SWAP_METHODS[0],
         help = f"Swap method for faceswap (options are: {SWAP_METHODS}"
     )
+    parser.add_argument("-so", "--swap-order", type = str,
+        help = "Comma-separated list with order of faceswaps on target, implies a multiswap"
+    )
     parser.add_argument("-v", "--verbose", action = "store_true",
         help = "Show debug information"
     )
@@ -440,7 +443,8 @@ def main(args):
             overlay_nosemouth = not args.no_nosemouth,
             reporthook = update_pbar,
             swap_method = args.swap_method,
-            warp_3d = args.warp_3d
+            warp_3d = args.warp_3d,
+            swap_order = args.swap_order
         )
 
         # Directory of faces to directory of heads
