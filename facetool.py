@@ -297,7 +297,9 @@ def main(args):
 
         detect = Detect()
 
-        for path in Path(args.input).images():
+        images = Path(args.input).images()
+
+        for path in images:
             logging.debug(f"Cropping <{path}>")
             detect.crop(str(path), args.output)
 

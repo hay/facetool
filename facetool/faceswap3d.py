@@ -255,7 +255,7 @@ class Faceswap3d:
 
         return points - np.asarray([[x, y]]), (x, y, w, h), im[y:y+h, x:x+w]
 
-    def faceswap(self, head, face, output):
+    def faceswap(self, head, face, output, order = None, order_repeat = False):
         logger.debug(f"Faceswap {head} on {face} as {output}")
 
         src_img = cv2.imread(face)

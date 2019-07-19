@@ -3,6 +3,7 @@ import os
 import logging
 import pathlib
 from .constants import IMAGE_EXTENSIONS, VIDEO_EXTENSIONS
+from .util import ArgumentError
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +15,9 @@ class Path(type(pathlib.Path())):
         return len(list(self.images()))
 
     def files(self):
-        if self.is_file():
+        if not self.exists():
+            raise ArgumentError(f"Path doesn't exist: {self}")
+        elif self.is_file():
             yield Path(str(self))
         else:
             for path in self.glob("*"):
