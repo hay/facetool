@@ -82,8 +82,6 @@ def sample_remove(in_path, percentage, force_delete = False):
     logging.info(f"Removing {round(len(images) * percentage)} of {len(images)} images")
 
     for path in images:
-        rand = random()
-
-        if rand < perc:
+        if random() < percentage:
             logging.debug(f"Removing {path}")
             path.unlink()
