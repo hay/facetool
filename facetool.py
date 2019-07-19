@@ -3,7 +3,7 @@ from facetool import config, media, util
 from facetool.constants import *
 from facetool.path import Path
 from facetool.profiler import Profiler
-from facetool.util import ArgumentError, message
+from facetool.util import ArgumentError, message, force_mkdir
 
 from tqdm import tqdm
 import argparse
@@ -294,14 +294,29 @@ def main(args):
 
     elif args.command == "crop":
         from facetool.detect import Detect
+        from facetool.media import extractframes
 
         detect = Detect()
 
-        images = Path(args.input).images()
+        # FIXME: we need some general mechanism for juggling frames around
+        TMP_DIR = "crop-tmp"
+        IS_VIDEO = Path(args.input).is_video()
+
+        logging.debug(f"Cropping. Input is video? {IS_VIDEO}")
+
+        if IS_VIDEO:
+            force_mkdir(TMP_DIR)
+            extractframes(args.input, TMP_DIR)
+            images = Path(TMP_DIR).images()
+        else:
+            images = Path(args.input).images()
 
         for path in images:
             logging.debug(f"Cropping <{path}>")
             detect.crop(str(path), args.output)
+
+        if IS_VIDEO:
+            shutil.rmtree(TMP_DIR)
 
     elif args.command == "classify":
         from facetool.classifier import Classifier
