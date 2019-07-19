@@ -3,7 +3,7 @@ import os
 import logging
 import pathlib
 from .constants import IMAGE_EXTENSIONS, VIDEO_EXTENSIONS
-from .util import ArgumentError
+from .errors import ArgumentError
 
 logger = logging.getLogger(__name__)
 

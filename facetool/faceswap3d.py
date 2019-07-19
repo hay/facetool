@@ -1,7 +1,7 @@
 # Code adapted from < https://github.com/wuhuikai/FaceSwap >
 from . import config
 from .constants import FEATHER_AMOUNT, BLUR_AMOUNT
-from .util import TooManyFacesError, NoFacesError
+from .errors import TooManyFacesError, NoFacesError
 
 import logging
 import cv2

@@ -4,7 +4,7 @@ import logging
 import math
 from .constants import DEFAULT_TRESHOLD
 from .path import Path
-from .util import ArgumentError, FaceError
+from .errors import ArgumentError, FaceError
 
 logger = logging.getLogger(__name__)
 

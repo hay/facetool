@@ -4,8 +4,8 @@ from glob import glob
 from .path import Path
 from .constants import FEATHER_AMOUNT, BLUR_AMOUNT
 from .media import is_image, is_video, extractframes, combineframes
-from .util import force_mkdir, get_basename, numberize_files, mkdir_if_not_exists
-from .util import TooManyFacesError, NoFacesError, FaceError, message
+from .util import force_mkdir, get_basename, numberize_files, mkdir_if_not_exists, message
+from .errors import TooManyFacesError, NoFacesError, FaceError
 
 logger = logging.getLogger(__name__)
 

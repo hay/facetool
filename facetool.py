@@ -3,8 +3,10 @@ from facetool import config, media, util
 from facetool.constants import *
 from facetool.path import Path
 from facetool.profiler import Profiler
-from facetool.util import ArgumentError, message, force_mkdir
+from facetool.errors import ArgumentError
+from facetool.util import message, force_mkdir, sample_remove
 
+from random import random
 from tqdm import tqdm
 import argparse
 import logging
@@ -13,6 +15,7 @@ import os
 import pandas as pd
 import pdb
 import shutil
+import sys
 
 COMMANDS = (
     "average",
@@ -27,6 +30,7 @@ COMMANDS = (
     "locate",
     "pose",
     "probe",
+    "sample",
     "swap",
 )
 
@@ -75,6 +79,9 @@ def get_parser():
     parser.add_argument("-dd", "--data-directory", type = str,
         default = DATA_DIRECTORY,
         help = "Directory where the data files are located"
+    )
+    parser.add_argument("-f", "--force", action = "store_true",
+        help = "Force commands and ignore warnings, like with sample"
     )
     parser.add_argument("-fr", "--framerate", type = str,
         default = DEFAULT_FRAMERATE
@@ -129,6 +136,9 @@ def get_parser():
     parser.add_argument("-so", "--swap-order", type = str,
         help = "Comma-separated list with order of faceswaps on target, implies a multiswap"
     )
+    parser.add_argument("-sp", "--sample-percentage", type = float,
+        help = "Percentage of files in a directory to randomly remove (used for the sample command)"
+    )
     parser.add_argument("-sr", "--swap-order-repeat", action = "store_true", default = False,
         help = "When using --swap-order and there are not enough target faces, repeat the sequence"
     )
@@ -170,6 +180,13 @@ def main(args):
     # Combine all frames from a set of jpg files to a movie
     elif args.command == "combineframes":
         media.combineframes(args.input, args.output, framerate = args.framerate)
+
+    # Randomly remove (sample) a percentage of files from a given directory
+    elif args.command == "sample":
+        if not args.sample_percentage:
+            raise ArgumentError("The sample command needs a sample percentage (-sp)")
+
+        sample_remove(args.input, args.sample_percentage, force_delete = args.force)
 
     # Show metadata on a media file
     elif args.command == "probe":

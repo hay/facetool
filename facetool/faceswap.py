@@ -40,7 +40,7 @@ sourceforge:
 from . import config
 from .constants import FEATHER_AMOUNT, BLUR_AMOUNT
 from .profiler import Profiler
-from .util import TooManyFacesError, NoFacesError
+from .errors import TooManyFacesError, NoFacesError
 
 profiler = Profiler("faceswap.py")
 

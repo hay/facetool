@@ -1,25 +1,19 @@
+from collections import namedtuple
+from glob import glob
+from random import random
+
+import logging
 import os
 import shutil
-import logging
-from . import config
-from glob import glob
-from collections import namedtuple
+import sys
+
+from facetool import config
+from facetool.path import Path
+
 logger = logging.getLogger(__name__)
 
 Coord = namedtuple("Coord", "x y w h")
 Point = namedtuple("Point", "x y")
-
-class ArgumentError(Exception):
-    pass
-
-class FaceError(Exception):
-    pass
-
-class TooManyFacesError(FaceError):
-    pass
-
-class NoFacesError(FaceError):
-    pass
 
 def message(*args):
     if not config.QUIET:
@@ -76,3 +70,20 @@ def rect_to_bb(rect):
 
     # return a tuple of (x, y, w, h)
     return Coord(x, y, w, h)
+
+def sample_remove(in_path, percentage, force_delete = False):
+    if not force_delete:
+        choice = input(f"This will REMOVE {round(percentage * 100)}% of all files, are you sure? [y/n] ")
+
+        if choice.lower() != "y":
+            sys.exit("Aborting sample")
+
+    images = list(Path(in_path).images())
+    logging.info(f"Removing {round(len(images) * percentage)} of {len(images)} images")
+
+    for path in images:
+        rand = random()
+
+        if rand < perc:
+            logging.debug(f"Removing {path}")
+            path.unlink()
