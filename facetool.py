@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
+from dataknead import Knead
 from facetool import config, media, util
 from facetool.constants import *
 from facetool.path import Path
 from facetool.profiler import Profiler
 from facetool.errors import ArgumentError
-from facetool.util import message, force_mkdir, sample_remove
+from facetool.util import message, force_mkdir, sample_remove, is_json_path
 
 from random import random
 from tqdm import tqdm
@@ -20,6 +21,7 @@ import sys
 COMMANDS = (
     "average",
     "classify",
+    "cluster",
     "combineframes",
     "count",
     "distance",
@@ -446,6 +448,32 @@ def main(args):
             f.write(encodings)
 
         message(f"Written encodings of {args.input} to {args.output}")
+
+    elif args.command == "cluster":
+        from facetool.clusterer import Clusterer
+
+        # A .json file with encodings is also valid, if that is give, use that
+        # instead
+        if is_json_path(args.input):
+            encodings = Knead(args.input).data()["encodings"]
+        else:
+            from facetool.recognizer import Recognizer
+            recognizer = Recognizer()
+            encodings = recognizer.encode_path(args.input, return_type = "dict")
+            encodings = encodings["encodings"]
+
+        clusterer = Clusterer()
+        output = clusterer.cluster_encodings(encodings)
+
+        if args.output:
+            if is_json_path(args.output):
+                Knead(output).write(args.output)
+            else:
+                force_mkdir(args.output)
+                clusterer.move_files(output, args.output)
+        else:
+            # Just print the output
+            Knead(output).print()
 
     elif args.command == "swap":
         from facetool.swapper import Swapper

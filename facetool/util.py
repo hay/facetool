@@ -51,6 +51,9 @@ def globify(path):
         for f in files:
             yield f
 
+def is_json_path(path):
+    return Path(path).suffix == ".json"
+
 def numberize_files(path):
     files = sorted(list(glob(path + "/*")))
 

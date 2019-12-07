@@ -52,7 +52,7 @@ class Recognizer:
 
         return image_encodings[0]
 
-    def encode_path(self, path):
+    def encode_path(self, path, return_type = "json"):
         encodings = {}
         image_paths = [str(p) for p in Path(path).images()]
         logging.debug(f"Encoding {len(image_paths)} images")
@@ -68,10 +68,17 @@ class Recognizer:
         logging.debug(f"Encoded {len(encodings.values())} images")
 
         # Return encodings in a key, for future-proofing this file format
-        # And return as JSON
-        return json.dumps({
+        # And return as JSON or a dict
+        ret = {
             "encodings" : encodings
-        })
+        }
+
+        if return_type == "json":
+            return json.dumps(ret)
+        elif return_type == "dict":
+            return ret
+        else:
+            raise ArgumentError(f"Invalid return_type: {return_type}")
 
     def recognize(self,
         input_path,
