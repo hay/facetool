@@ -40,6 +40,7 @@ class Swapper:
         overlay_nosemouth = True,
         only_mouth = False,
         swap_audio = True,
+        audio_input = False,
         reporthook = None,
         swap_method = "faceswap",
         warp_3d = False,
@@ -59,6 +60,7 @@ class Swapper:
         self.swap_order = parse_swap_order(swap_order)
         self.swap_order_repeat = swap_order_repeat
         self.swap_audio = swap_audio
+        self.audio_input = audio_input
 
         kwargs = {
             "predictor_path" : self.predictor_path,
@@ -193,9 +195,15 @@ class Swapper:
             combineframes(OUT_TMP, out)
         else:
             TMP_VIDEO = str(Path(OUT_TMP) / "_silent.mp4")
+
+            # TODO: make a function out of this
+            if self.audio_input:
+                audio_file = args.audio_input
+            else:
+                audio_file = f"{AUDIO_TMP}/{TEMP_AUDIO_FILENAME}"
+
             combineframes(OUT_TMP, TMP_VIDEO)
-            combineaudio(TMP_VIDEO, f"{AUDIO_TMP}/{TEMP_AUDIO_FILENAME}", out)
-            exit()
+            combineaudio(TMP_VIDEO, audio_file, out)
 
         if not self.keep_temp:
             [shutil.rmtree(p) for p in VIDEO_TO_VIDEO]

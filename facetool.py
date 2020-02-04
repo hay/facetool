@@ -22,6 +22,7 @@ COMMANDS = (
     "average",
     "classify",
     "cluster",
+    "combineaudio",
     "combineframes",
     "count",
     "distance",
@@ -71,6 +72,10 @@ def get_parser():
     )
 
     # Extra arguments
+    parser.add_argument("-ai", "--audio-input", type = str,
+        default = None,
+        help = "Add a separate audio file with the end result movie"
+    )
     parser.add_argument("--as-percentage", action = "store_true",
         help = "Show face distances as percentages"
     )
@@ -184,6 +189,10 @@ def main(args):
     # Combine all frames from a set of jpg files to a movie
     elif args.command == "combineframes":
         media.combineframes(args.input, args.output, framerate = args.framerate)
+
+    # Combine audio with an input movie
+    elif args.command == "combineaudio":
+        media.combineaudio(args.input, args.audio_input, args.output)
 
     # Randomly remove (sample) a percentage of files from a given directory
     elif args.command == "sample":
