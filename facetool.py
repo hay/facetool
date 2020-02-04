@@ -106,6 +106,7 @@ def get_parser():
     parser.add_argument("-m", "--model", type = str,
         help = "Use a precalculated model (for calculating distances)"
     )
+    parser.add_argument("--no-audio", action = "store_true")
     parser.add_argument("--no-eyesbrows", action = "store_true")
     parser.add_argument("--no-nosemouth", action = "store_true")
     parser.add_argument("--only-mouth", action="store_true")
@@ -505,6 +506,7 @@ def main(args):
             feather = args.feather,
             blur = args.blur,
             keep_temp = args.keep_temp,
+            swap_audio = not args.no_audio,
             overlay_eyesbrows = not args.no_eyesbrows,
             overlay_nosemouth = not args.no_nosemouth,
             only_mouth = args.only_mouth,

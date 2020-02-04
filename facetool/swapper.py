@@ -2,18 +2,19 @@ import logging
 import shutil
 from glob import glob
 from .path import Path
-from .constants import FEATHER_AMOUNT, BLUR_AMOUNT
-from .media import is_image, is_video, extractframes, combineframes
+from .constants import FEATHER_AMOUNT, BLUR_AMOUNT, TEMP_AUDIO_FILENAME
+from .media import is_image, is_video, extractframes, combineframes, extractaudio, combineaudio
 from .util import force_mkdir, get_basename, numberize_files, mkdir_if_not_exists, message
 from .errors import TooManyFacesError, NoFacesError, FaceError
 
 logger = logging.getLogger(__name__)
 
+AUDIO_TMP = "audio-tmp"
 HEAD_TMP = "head-tmp"
 FACE_TMP = "face-tmp"
 OUT_TMP = "out-tmp"
 IMG_TO_VIDEO = (HEAD_TMP, OUT_TMP)
-VIDEO_TO_VIDEO = (HEAD_TMP, OUT_TMP, FACE_TMP)
+VIDEO_TO_VIDEO = (HEAD_TMP, OUT_TMP, FACE_TMP, AUDIO_TMP)
 
 def parse_swap_order(swap_order):
     if swap_order == None:
@@ -38,6 +39,7 @@ class Swapper:
         overlay_eyesbrows = True,
         overlay_nosemouth = True,
         only_mouth = False,
+        swap_audio = True,
         reporthook = None,
         swap_method = "faceswap",
         warp_3d = False,
@@ -56,6 +58,7 @@ class Swapper:
         self.warp_3d = warp_3d
         self.swap_order = parse_swap_order(swap_order)
         self.swap_order_repeat = swap_order_repeat
+        self.swap_audio = swap_audio
 
         kwargs = {
             "predictor_path" : self.predictor_path,
@@ -163,6 +166,7 @@ class Swapper:
         [force_mkdir(p) for p in VIDEO_TO_VIDEO]
         extractframes(head, HEAD_TMP)
         extractframes(face, FACE_TMP)
+        extractaudio(face, AUDIO_TMP)
 
         heads = sorted(glob(f"{HEAD_TMP}/*"))
         faces = sorted(glob(f"{FACE_TMP}/*"))
@@ -184,7 +188,14 @@ class Swapper:
             self._faceswap(path, face, outpath)
 
         numberize_files(OUT_TMP)
-        combineframes(OUT_TMP, out)
+
+        if not self.swap_audio:
+            combineframes(OUT_TMP, out)
+        else:
+            TMP_VIDEO = str(Path(OUT_TMP) / "_silent.mp4")
+            combineframes(OUT_TMP, TMP_VIDEO)
+            combineaudio(TMP_VIDEO, f"{AUDIO_TMP}/{TEMP_AUDIO_FILENAME}", out)
+            exit()
 
         if not self.keep_temp:
             [shutil.rmtree(p) for p in VIDEO_TO_VIDEO]

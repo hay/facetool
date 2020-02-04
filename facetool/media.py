@@ -1,6 +1,7 @@
 from glob import glob
 from pathlib import Path
 from .constants import DEFAULT_FRAMERATE, TEMP_AUDIO_FILENAME
+from .command import Command
 import ffmpeg
 import os
 import logging
@@ -20,6 +21,19 @@ def _run(cmd):
     command = " ".join(cmd.compile())
     logging.debug(command)
     cmd.run()
+
+"""
+Does something like this:
+
+ffmpeg -i a.mp4 -i a.wav -c copy -map 0:v:0 -map 1:a:0 -shortest -c:a aac -b:a 192k b.mp4
+"""
+def combineaudio(inp, audio, out):
+    logging.debug(f"Combining audio '{audio}' to '{inp}' as '{out}'")
+    cmd_str = f"ffmpeg -i {inp} -i {audio} -c copy -map 0:v:0 -map 1:a:0 -shortest -c:a aac -b:a 192k {out}"
+
+    # FIXME and use ffmpeg instead of command
+    cmd = Command()
+    cmd.call(cmd_str)
 
 """
 Does something like this:
@@ -47,15 +61,14 @@ def combineframes(inp, out, framerate = DEFAULT_FRAMERATE):
 
     _run(cmd)
 
-def extractframes(inp, out):
-    data = probe(inp)
-
-    # First extract audio as a WAV, because re-adding it as MP3 somehow
+def extractaudio(inp, out):
+    # Extract audio as a WAV, because re-adding it as MP3 somehow
     # doesn't work
-    WAV_PATH = str( Path(out) / TEMP_AUDIO_FILENAME )
-    cmd = ffmpeg.input(inp).output(WAV_PATH)
+    cmd = ffmpeg.input(inp).output(f"{out}/{TEMP_AUDIO_FILENAME}")
     _run(cmd)
 
+def extractframes(inp, out):
+    data = probe(inp)
     output = f"{out}/%{FRAME_FILENAME_LENGTH}d.jpg"
     cmd = ffmpeg.input(inp).output(output, **{"q:v" : 2})
     _run(cmd)
