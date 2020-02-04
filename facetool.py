@@ -114,6 +114,9 @@ def get_parser():
     parser.add_argument("--no-audio", action = "store_true")
     parser.add_argument("--no-eyesbrows", action = "store_true")
     parser.add_argument("--no-nosemouth", action = "store_true")
+    parser.add_argument("--no-threading", action = "store_true",
+        help = "Don't use multithreading"
+    )
     parser.add_argument("--only-mouth", action="store_true")
     parser.add_argument("-of", "--output-format",
         choices = OUTPUT_FORMAT_CHOICES,
@@ -528,7 +531,8 @@ def main(args):
             swap_method = args.swap_method,
             warp_3d = args.warp_3d,
             swap_order = args.swap_order,
-            swap_order_repeat = args.swap_order_repeat
+            swap_order_repeat = args.swap_order_repeat,
+            concurrent = not args.no_threading
         )
 
         # Directory of faces to directory of heads

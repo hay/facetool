@@ -1,5 +1,6 @@
 import logging
 import shutil
+from concurrent.futures import ThreadPoolExecutor
 from glob import glob
 from .path import Path
 from .constants import FEATHER_AMOUNT, BLUR_AMOUNT, TEMP_AUDIO_FILENAME
@@ -45,7 +46,8 @@ class Swapper:
         swap_method = "faceswap",
         warp_3d = False,
         swap_order = None,
-        swap_order_repeat = False
+        swap_order_repeat = False,
+        concurrent = False
     ):
         self.done = 0
         self.filecount = None
@@ -61,6 +63,7 @@ class Swapper:
         self.swap_order_repeat = swap_order_repeat
         self.swap_audio = swap_audio
         self.audio_input = audio_input
+        self.concurrent = concurrent
 
         kwargs = {
             "predictor_path" : self.predictor_path,
@@ -123,6 +126,19 @@ class Swapper:
         if self.reporthook:
             self.reporthook()
 
+    # This is a wrapper so we can control multithreading
+    def _multiswap(self, swaps):
+
+        if self.concurrent:
+            paths, faces, outpaths = zip(*swaps)
+
+            with ThreadPoolExecutor(max_workers = 20) as executor:
+                executor.map(self._faceswap, paths, faces, outpaths)
+        else:
+            # Simply iterate over the list instead of using the
+            # threaded model
+            [self._faceswap(*swap) for swap in swaps]
+
     def _set_filecount(self, filecount):
         if not self.filecount:
             self.filecount = filecount
@@ -154,9 +170,13 @@ class Swapper:
         dirpath = Path(HEAD_TMP)
         self._set_filecount(dirpath.count_images())
 
+        swaps = []
+
         for path in dirpath.glob("*"):
             outpath = f"{OUT_TMP}/{get_basename(path)}.jpg"
-            self._faceswap(path, face, outpath)
+            swaps.append([path, face, outpath])
+
+        self._multiswap(swaps)
 
         numberize_files(OUT_TMP)
         combineframes(OUT_TMP, out)
@@ -178,6 +198,8 @@ class Swapper:
 
         self._set_filecount(len(heads))
 
+        swaps = []
+
         for index, path in enumerate(heads):
             outpath = f"{OUT_TMP}/{get_basename(path)}.jpg"
 
@@ -187,7 +209,9 @@ class Swapper:
                 break
 
             face = faces[index]
-            self._faceswap(path, face, outpath)
+            swaps.append([path, face, outpath])
+
+        self._multiswap(swaps)
 
         numberize_files(OUT_TMP)
 
