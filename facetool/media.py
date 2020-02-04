@@ -1,5 +1,6 @@
 from glob import glob
-from .constants import DEFAULT_FRAMERATE
+from pathlib import Path
+from .constants import DEFAULT_FRAMERATE, TEMP_AUDIO_FILENAME
 import ffmpeg
 import os
 import logging
@@ -48,6 +49,13 @@ def combineframes(inp, out, framerate = DEFAULT_FRAMERATE):
 
 def extractframes(inp, out):
     data = probe(inp)
+
+    # First extract audio as a WAV, because re-adding it as MP3 somehow
+    # doesn't work
+    WAV_PATH = str( Path(out) / TEMP_AUDIO_FILENAME )
+    cmd = ffmpeg.input(inp).output(WAV_PATH)
+    _run(cmd)
+
     output = f"{out}/%{FRAME_FILENAME_LENGTH}d.jpg"
     cmd = ffmpeg.input(inp).output(output, **{"q:v" : 2})
     _run(cmd)

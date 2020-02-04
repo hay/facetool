@@ -252,8 +252,11 @@ class Faceswap:
         logger.debug(f"Faceswap {head} on {face} as {output}")
         logger.debug(f"Order: {order}")
 
-        im1, landmarks1 = self._read_im_and_landmarks(head)
-        im2, landmarks2 = self._read_im_and_landmarks(face)
+        try:
+            im1, landmarks1 = self._read_im_and_landmarks(head)
+            im2, landmarks2 = self._read_im_and_landmarks(face)
+        except:
+            raise NoFacesError
 
         logger.debug(f"Landmarks found: head:{len(landmarks1)}, face:{len(landmarks2)}")
         logger.debug(f"Repeat order? {order_repeat}")
