@@ -11,8 +11,8 @@ Some things `facetool` can do:
 * Create an average face
 * Counting faces
 * Cropping faces (even multiple ones from a single image)
-* Extracting and combining frames from and to videos
 * Classifying faces based on age and gender
+* Extracting and combining frames from and to videos
 
 ## Installation
 In theory, this tool should work on any system that can run the required libraries (`dlib`, `opencv` and a couple of other ones), but in practice i've only tested it on MacOS.
@@ -57,7 +57,7 @@ Put the features of face.jpg on a video file called head.mp4 and save as swap.mp
 
     facetool.py swap -i face.jpg -t head.mp4 -o swap.mp4
 
-Put the features of a video file called face.mp4 on another video file called head.mp4 and save as swap.mp4
+Put the features of a video file called face.mp4 on another video file called head.mp4 and save as swap.mp4. The audio of `face.mp4` will be used for the output.
 
     facetool.py swap -i face.mp4 -t head.mp4 -o swap.mp4
 
@@ -68,6 +68,30 @@ Take one 'head' image called `head.jpg` and generate a new faceswap for every fi
 The other way around: apply the face of `face.jpg` to a directory of `heads` and output to a directory called `face-to-dir`
 
     facetool.py swap -i face.jpg -t heads -o face-to-dir
+
+When having multiple faces in an input image, select the one you want to use (in the example there are three faces and we want the second face)
+
+    facetool.py swap -i face.jpg -t head.jpg -o swap.jpg -so x,0,x
+
+Put one face on all faces in a target image
+
+    facetool.py swap -i face.jpg -t group.jpg -o swap.jpg -so 0 -sr
+
+Swap two faces in a single image (given that the image has only two faces)
+
+    facetool.py swap -i group.jpg -t group.jpg -o group-swapped.jpg -so 1,0
+
+Only swap nose and mouth
+
+    facetool.py swap -i face.jpg -t head.jpg -o swap.jpg --no-eyesbrows
+
+Only swap eyes and brows
+
+    facetool.py swap -i face.jpg -t head.jpg -o swap.jpg --no-nosemouth
+
+Only swap mouth
+
+    facetool.py swap -i face.jpg -t head.jpg -o swap.jpg --only-mouth
 
 ### Face recognition and clustering
 
@@ -174,6 +198,10 @@ Convert a set of JPG files from the directory `frames` to a movie file called `m
 
     facetool.py combineframes -i frames -o movie.mp4
 
+Combine a WAV file with an existing movie and save to a new one
+
+    facetool.py combineaudio -i movie.mp4 -ai sound.wav -o movie-sound.mp4
+
 Return metadata about an image or video file in JSON format
 
     facetool.py probe -i movie.mp4
@@ -187,18 +215,21 @@ Return metadata about an image or video file in JSON format
 You'll get this output when running `facetool.py -h`.
 
 ```bash
-usage: facetool.py [-h] -i INPUT [-o OUTPUT] [-t TARGET] [--as-percentage]
-                   [-bl BLUR] [-dd DATA_DIRECTORY] [-fr FRAMERATE]
-                   [-fa FEATHER] [-ih IMAGE_HEIGHT] [-iw IMAGE_WIDTH] [-kt]
-                   [-m MODEL] [--no-eyesbrows] [--no-nosemouth]
-                   [-of {default,csv,json}] [-pp PREDICTOR_PATH] [--profile]
-                   [-s] [--save-originals] [--save-warped] [-v] [-vv]
-                   [{average,classify,combineframes,count,distance,crop,encode,extractframes,landmarks,locate,pose,probe,swap}]
+usage: facetool [-h] -i INPUT [-o OUTPUT] [-t TARGET] [-ai AUDIO_INPUT]
+                [--as-percentage] [-bl BLUR] [-dd DATA_DIRECTORY] [-f]
+                [-fr FRAMERATE] [-fa FEATHER] [-ih IMAGE_HEIGHT]
+                [-iw IMAGE_WIDTH] [-kt] [-m MODEL] [--no-audio]
+                [--no-eyesbrows] [--no-nosemouth] [--only-mouth]
+                [-of {default,csv,json}] [-pp PREDICTOR_PATH] [--profile] [-q]
+                [-s] [--save-originals] [--save-warped]
+                [--swap-method {faceswap,faceswap3d}] [-so SWAP_ORDER]
+                [-sp SAMPLE_PERCENTAGE] [-sr] [-v] [-vv] [--warp-3d]
+                [{average,classify,cluster,combineaudio,combineframes,count,distance,crop,encode,extractframes,landmarks,locate,pose,probe,sample,swap}]
 
 Manipulate faces in videos and images
 
 positional arguments:
-  {average,classify,combineframes,count,distance,crop,encode,extractframes,landmarks,locate,pose,probe,swap}
+  {average,classify,cluster,combineaudio,combineframes,count,distance,crop,encode,extractframes,landmarks,locate,pose,probe,sample,swap}
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -208,11 +239,14 @@ optional arguments:
                         Output file or folder
   -t TARGET, --target TARGET
                         'Head' when swapping
+  -ai AUDIO_INPUT, --audio-input AUDIO_INPUT
+                        Add a separate audio file with the end result movie
   --as-percentage       Show face distances as percentages
   -bl BLUR, --blur BLUR
                         Amount of blur to use during colour correction
   -dd DATA_DIRECTORY, --data-directory DATA_DIRECTORY
                         Directory where the data files are located
+  -f, --force           Force commands and ignore warnings, like with sample
   -fr FRAMERATE, --framerate FRAMERATE
   -fa FEATHER, --feather FEATHER
                         Softness of edges on a swapped face
@@ -220,31 +254,47 @@ optional arguments:
                         Height of output image / height
   -iw IMAGE_WIDTH, --image-width IMAGE_WIDTH
                         Width of output image / video
-  -kt, --keep-temp      Keep temporary files (used with video swapping
+  -kt, --keep-temp      Keep temporary files (used with video swapping)
   -m MODEL, --model MODEL
                         Use a precalculated model (for calculating distances)
+  --no-audio
   --no-eyesbrows
   --no-nosemouth
+  --only-mouth
   -of {default,csv,json}, --output-format {default,csv,json}
                         Specify output format
   -pp PREDICTOR_PATH, --predictor-path PREDICTOR_PATH
   --profile             Show profiler information
+  -q, --quiet           Don't print output to the console
   -s, --swap            Swap input and target
   --save-originals      Save original images when averaging faces
   --save-warped         Save warped images when averaging faces
+  --swap-method {faceswap,faceswap3d}
+                        Swap method for faceswap (options are: ['faceswap',
+                        'faceswap3d']
+  -so SWAP_ORDER, --swap-order SWAP_ORDER
+                        Comma-separated list with order of faceswaps on
+                        target, implies a multiswap
+  -sp SAMPLE_PERCENTAGE, --sample-percentage SAMPLE_PERCENTAGE
+                        Percentage of files in a directory to randomly remove
+                        (used for the sample command)
+  -sr, --swap-order-repeat
+                        When using --swap-order and there are not enough
+                        target faces, repeat the sequence
   -v, --verbose         Show debug information
   -vv, --extra-verbose  Show debug information AND raise / abort on exceptions
+  --warp-3d             Swap faces and morph to coordinates of target face
 ```
 
 ## Limitations
-* Face swapping is limited to one face.
 * More advanced swapping methods like 'deepfake' are not supported.
 * Even though you could use the library in your own scripts (instead of using the command line utility), this isn't very well supported yet.
 * No multithreading / processor support.
-* Operations on videos will remove the audio.
+<s>* Face swapping is limited to one face.</s>
+<s>* Operations on videos will remove the audio.</s>
 
 ## Testing
-`facetool` doesn't have a proper test suite yet, but you could try running `test-all.sh` in the `test` directory to try a couple of common examples.
+`facetool` doesn't have a proper test suite yet, but you could try running `test-all.py` in the `test` directory to try a couple of common examples.
 
 ## License
 Licensed under the [MIT license](https://opensource.org/licenses/MIT).
