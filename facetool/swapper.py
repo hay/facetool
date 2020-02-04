@@ -37,6 +37,7 @@ class Swapper:
         keep_temp = False,
         overlay_eyesbrows = True,
         overlay_nosemouth = True,
+        only_mouth = False,
         reporthook = None,
         swap_method = "faceswap",
         warp_3d = False,
@@ -61,7 +62,8 @@ class Swapper:
             "feather" : self.feather,
             "blur" : self.blur,
             "overlay_eyesbrows" : overlay_eyesbrows,
-            "overlay_nosemouth" : overlay_nosemouth
+            "overlay_nosemouth" : overlay_nosemouth,
+            "only_mouth" : only_mouth
         }
 
         logging.debug(f"Using swapmethod '{self.swap_method}'")

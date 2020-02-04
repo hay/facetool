@@ -108,6 +108,7 @@ def get_parser():
     )
     parser.add_argument("--no-eyesbrows", action = "store_true")
     parser.add_argument("--no-nosemouth", action = "store_true")
+    parser.add_argument("--only-mouth", action="store_true")
     parser.add_argument("-of", "--output-format",
         choices = OUTPUT_FORMAT_CHOICES,
         help = "Specify output format"
@@ -506,6 +507,7 @@ def main(args):
             keep_temp = args.keep_temp,
             overlay_eyesbrows = not args.no_eyesbrows,
             overlay_nosemouth = not args.no_nosemouth,
+            only_mouth = args.only_mouth,
             reporthook = update_pbar,
             swap_method = args.swap_method,
             warp_3d = args.warp_3d,

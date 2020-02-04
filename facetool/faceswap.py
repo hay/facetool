@@ -86,6 +86,7 @@ class Faceswap:
         predictor_path,
         overlay_eyesbrows = True,
         overlay_nosemouth = True,
+        only_mouth = False,
         feather = FEATHER_AMOUNT,
         blur = BLUR_AMOUNT
     ):
@@ -97,11 +98,17 @@ class Faceswap:
         self.overlay_points = []
         self.landmark_hashes = {}
 
-        if overlay_eyesbrows:
-            self.overlay_points.append(EYES_BROWS_POINTS)
+        logger.debug(f"Only swap mouth? {only_mouth}")
 
-        if overlay_nosemouth:
-            self.overlay_points.append(NOSE_MOUTH_POINTS)
+        # TODO: this should be a little bit less messy
+        if only_mouth:
+            self.overlay_points.append(MOUTH_POINTS)
+        else:
+            if overlay_eyesbrows:
+                self.overlay_points.append(EYES_BROWS_POINTS)
+
+            if overlay_nosemouth:
+                self.overlay_points.append(NOSE_MOUTH_POINTS)
 
     def _annotate_landmarks(self, im, landmarks):
         im = im.copy()
