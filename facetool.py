@@ -326,6 +326,11 @@ def main(args):
         from facetool.detect import Detect
         from facetool.media import extractframes
 
+        # We can't crop to an image path, because an input image might
+        # have multiple faces, so throw an error in that case
+        if Path(args.output).is_image():
+            raise ArgumentError(f"Can't crop with an image as output")
+
         detect = Detect()
 
         # FIXME: we need some general mechanism for juggling frames around

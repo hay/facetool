@@ -9,7 +9,7 @@ TESTS = [
     },
     {
         "label" : "Crop faces (image)",
-        "command" : "crop -i test/img-single/1.jpg -o test/output/crop-image.jpg"
+        "command" : "crop -i test/img-single/1.jpg -o test/output/crop-image"
     },
     {
         "label" : "Crop faces (directory)",
