@@ -15,12 +15,15 @@ logger = logging.getLogger(__name__)
 class Faceswap3d:
     def __init__(self,
         predictor_path,
-        overlay_eyesbrows = True,
-        overlay_nosemouth = True,
         feather = FEATHER_AMOUNT,
         blur = BLUR_AMOUNT,
         warp_3d = False,
-        correct_color = True
+        correct_color = True,
+
+        # Note that these arguments don't do anything yet
+        overlay_eyesbrows = True,
+        overlay_nosemouth = True,
+        only_mouth = False
     ):
         self.predictor_path = predictor_path
         self.correct_color = correct_color
