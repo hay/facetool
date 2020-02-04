@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from time import time
 from tests import TESTS
 import argparse
 import subprocess
@@ -32,6 +33,9 @@ if __name__ == "__main__":
 
     cleanup()
 
+    then = time()
+    print("*** Starting tests ***")
+
     for index, test in enumerate(TESTS):
         if (args.run is not None) and args.run != index:
             continue
@@ -47,3 +51,6 @@ if __name__ == "__main__":
 
         print(f"\n*** {test['label']} ***\n")
         run_test(test)
+
+    now = round(time() - then, 2)
+    print(f"\n*** Tests took {now} seconds ***")
