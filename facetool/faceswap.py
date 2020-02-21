@@ -88,7 +88,9 @@ class Faceswap:
         overlay_nosemouth = True,
         only_mouth = False,
         feather = FEATHER_AMOUNT,
-        blur = BLUR_AMOUNT
+        blur = BLUR_AMOUNT,
+        ignore_nofaces = False,
+        colour_correct = True
     ):
         self.predictor_path = predictor_path
         self.blur = blur
@@ -97,8 +99,12 @@ class Faceswap:
         self.predictor = dlib.shape_predictor(self.predictor_path)
         self.overlay_points = []
         self.landmark_hashes = {}
+        self.ignore_nofaces = ignore_nofaces
+        self.colour_correct = colour_correct
 
+        logger.debug(f"Ignoring nofaces? {ignore_nofaces}")
         logger.debug(f"Only swap mouth? {only_mouth}")
+        logger.debug(f"Colour correct? {colour_correct}")
 
         # TODO: this should be a little bit less messy
         if only_mouth:
@@ -122,20 +128,23 @@ class Faceswap:
         return im
 
     def _correct_colours(self, im1, im2, landmarks1):
-        blur_amount = self.blur * numpy.linalg.norm(
-                                  numpy.mean(landmarks1[LEFT_EYE_POINTS], axis=0) -
-                                  numpy.mean(landmarks1[RIGHT_EYE_POINTS], axis=0))
-        blur_amount = int(blur_amount)
-        if blur_amount % 2 == 0:
-            blur_amount += 1
-        im1_blur = cv2.GaussianBlur(im1, (blur_amount, blur_amount), 0)
-        im2_blur = cv2.GaussianBlur(im2, (blur_amount, blur_amount), 0)
+        if self.colour_correct:
+            blur_amount = self.blur * numpy.linalg.norm(
+                                      numpy.mean(landmarks1[LEFT_EYE_POINTS], axis=0) -
+                                      numpy.mean(landmarks1[RIGHT_EYE_POINTS], axis=0))
+            blur_amount = int(blur_amount)
+            if blur_amount % 2 == 0:
+                blur_amount += 1
+            im1_blur = cv2.GaussianBlur(im1, (blur_amount, blur_amount), 0)
+            im2_blur = cv2.GaussianBlur(im2, (blur_amount, blur_amount), 0)
 
-        # Avoid divide-by-zero errors.
-        im2_blur += (128 * (im2_blur <= 1.0)).astype(im2_blur.dtype)
+            # Avoid divide-by-zero errors.
+            im2_blur += (128 * (im2_blur <= 1.0)).astype(im2_blur.dtype)
 
-        return (im2.astype(numpy.float64) * im1_blur.astype(numpy.float64) /
+            return (im2.astype(numpy.float64) * im1_blur.astype(numpy.float64) /
                                                     im2_blur.astype(numpy.float64))
+        else:
+            return im2
 
     def _draw_convex_hull(self, im, points, color):
         points = cv2.convexHull(points)

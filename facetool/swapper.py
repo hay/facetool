@@ -47,7 +47,9 @@ class Swapper:
         warp_3d = False,
         swap_order = None,
         swap_order_repeat = False,
-        concurrent = False
+        concurrent = False,
+        ignore_nofaces = False,
+        colour_correct = True
     ):
         self.done = 0
         self.filecount = None
@@ -64,6 +66,8 @@ class Swapper:
         self.swap_audio = swap_audio
         self.audio_input = audio_input
         self.concurrent = concurrent
+        self.ignore_nofaces = ignore_nofaces
+        self.colour_correct = colour_correct
 
         kwargs = {
             "predictor_path" : self.predictor_path,
@@ -71,7 +75,9 @@ class Swapper:
             "blur" : self.blur,
             "overlay_eyesbrows" : overlay_eyesbrows,
             "overlay_nosemouth" : overlay_nosemouth,
-            "only_mouth" : only_mouth
+            "only_mouth" : only_mouth,
+            "ignore_nofaces" : ignore_nofaces,
+            "colour_correct" : colour_correct
         }
 
         logging.debug(f"Using swapmethod '{self.swap_method}'")
@@ -118,6 +124,10 @@ class Swapper:
             message(f"Too many faces, could not swap ({msg})")
         except NoFacesError:
             message(f"No faces found, could not swap ({msg})")
+
+            if self.ignore_nofaces:
+                message("But ignoring nofaces, so swap anyway")
+                shutil.copy(head, out)
         except IndexError as e:
             message(f"Index error: {e}, ({msg})")
 
@@ -128,7 +138,6 @@ class Swapper:
 
     # This is a wrapper so we can control multithreading
     def _multiswap(self, swaps):
-
         if self.concurrent:
             paths, faces, outpaths = zip(*swaps)
 

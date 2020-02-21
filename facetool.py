@@ -97,6 +97,10 @@ def get_parser():
         default = FEATHER_AMOUNT,
         help = "Softness of edges on a swapped face"
     )
+    parser.add_argument("-if", "--ignore-nofaces", action = "store_true",
+        default = False,
+        help = "When having no faces to swap, keep the original input image"
+    )
     parser.add_argument("-ih", "--image-height", type = int,
         default = DEFAULT_IMAGE_HEIGHT,
         help = "Height of output image / height"
@@ -112,6 +116,9 @@ def get_parser():
         help = "Use a precalculated model (for calculating distances)"
     )
     parser.add_argument("--no-audio", action = "store_true")
+    parser.add_argument("-nocc", "--no-colour-correct", action = "store_true",
+        help = "Don't colour correct"
+    )
     parser.add_argument("--no-eyesbrows", action = "store_true")
     parser.add_argument("--no-nosemouth", action = "store_true")
     parser.add_argument("--no-threading", action = "store_true",
@@ -532,7 +539,9 @@ def main(args):
             warp_3d = args.warp_3d,
             swap_order = args.swap_order,
             swap_order_repeat = args.swap_order_repeat,
-            concurrent = not args.no_threading
+            ignore_nofaces = args.ignore_nofaces,
+            concurrent = not args.no_threading,
+            colour_correct = not args.no_colour_correct
         )
 
         # Directory of faces to directory of heads
