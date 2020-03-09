@@ -4,7 +4,9 @@ from random import random
 
 import logging
 import os
+import random
 import shutil
+import string
 import sys
 
 from facetool import config
@@ -61,6 +63,11 @@ def numberize_files(path):
         newpath = f"{path}/{str(index).zfill(4)}.jpg"
         logger.debug(f"Renaming {oldpath} to {newpath}")
         os.rename(oldpath, newpath)
+
+def random_filename():
+    # There are better ways to do this
+    alphabet = string.ascii_lowercase + string.digits
+    return ''.join(random.choices(alphabet, k=8))
 
 def rect_to_bb(rect):
     # take a bounding predicted by dlib and convert it

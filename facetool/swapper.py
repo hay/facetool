@@ -5,15 +5,18 @@ from glob import glob
 from .path import Path
 from .constants import FEATHER_AMOUNT, BLUR_AMOUNT, TEMP_AUDIO_FILENAME
 from .media import is_image, is_video, extractframes, combineframes, extractaudio, combineaudio
-from .util import force_mkdir, get_basename, numberize_files, mkdir_if_not_exists, message
+from .util import (force_mkdir, get_basename, numberize_files,
+                  mkdir_if_not_exists, message, random_filename)
 from .errors import TooManyFacesError, NoFacesError, FaceError
 
 logger = logging.getLogger(__name__)
 
-AUDIO_TMP = "audio-tmp"
-HEAD_TMP = "head-tmp"
-FACE_TMP = "face-tmp"
-OUT_TMP = "out-tmp"
+DIR_PREFIX = random_filename()
+AUDIO_TMP = f"audio-tmp-{DIR_PREFIX}"
+HEAD_TMP = f"head-tmp-{DIR_PREFIX}"
+FACE_TMP = f"face-tmp-{DIR_PREFIX}"
+OUT_TMP = f"out-tmp-{DIR_PREFIX}"
+
 IMG_TO_VIDEO = (HEAD_TMP, OUT_TMP)
 VIDEO_TO_VIDEO = (HEAD_TMP, OUT_TMP, FACE_TMP, AUDIO_TMP)
 
