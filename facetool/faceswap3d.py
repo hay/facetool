@@ -23,7 +23,9 @@ class Faceswap3d:
         # Note that these arguments don't do anything yet
         overlay_eyesbrows = True,
         overlay_nosemouth = True,
-        only_mouth = False
+        only_mouth = False,
+        ignore_nofaces = False,
+        colour_correct = True
     ):
         self.predictor_path = predictor_path
         self.correct_color = correct_color
