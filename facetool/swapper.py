@@ -11,14 +11,24 @@ from .errors import TooManyFacesError, NoFacesError, FaceError
 
 logger = logging.getLogger(__name__)
 
-DIR_SUFFIX = random_filename()
-AUDIO_TMP = f"audio-tmp-{DIR_SUFFIX}"
-HEAD_TMP = f"head-tmp-{DIR_SUFFIX}"
-FACE_TMP = f"face-tmp-{DIR_SUFFIX}"
-OUT_TMP = f"out-tmp-{DIR_SUFFIX}"
+class TempDirs:
+    def __init__(self, prefix):
+        if not prefix:
+            prefix = ""
 
-IMG_TO_VIDEO = (HEAD_TMP, OUT_TMP)
-VIDEO_TO_VIDEO = (HEAD_TMP, OUT_TMP, FACE_TMP, AUDIO_TMP)
+        # Make sure we have a trailing slash at the end,
+        # FIXME: this is not compatible with Windows
+        if prefix != "" and prefix[-1] != "/":
+            prefix = prefix + "/"
+
+        self.prefix = prefix
+        self.suffix = random_filename()
+        self.audio = f"{prefix}audio-tmp-{self.suffix}"
+        self.head = f"{prefix}head-tmp-{self.suffix}"
+        self.face = f"{prefix}face-tmp-{self.suffix}"
+        self.out = f"{prefix}out-tmp-{self.suffix}"
+        self.img_to_video = (self.head, self.out)
+        self.video_to_video = (self.head, self.out, self.face, self.audio)
 
 def parse_swap_order(swap_order):
     if swap_order == None:
@@ -52,7 +62,8 @@ class Swapper:
         swap_order_repeat = False,
         concurrent = False,
         ignore_nofaces = False,
-        colour_correct = True
+        colour_correct = True,
+        temp_dir = None
     ):
         self.done = 0
         self.filecount = None
@@ -71,6 +82,7 @@ class Swapper:
         self.concurrent = concurrent
         self.ignore_nofaces = ignore_nofaces
         self.colour_correct = colour_correct
+        self.tempdirs = TempDirs(temp_dir)
 
         kwargs = {
             "predictor_path" : self.predictor_path,
@@ -177,33 +189,33 @@ class Swapper:
         self._faceswap(head, face, out)
 
     def swap_image_to_video(self, head, face, out):
-        [force_mkdir(p) for p in IMG_TO_VIDEO]
-        extractframes(head, HEAD_TMP)
-        dirpath = Path(HEAD_TMP)
+        [force_mkdir(p) for p in self.tempdirs.img_to_video]
+        extractframes(head, self.tempdirs.head)
+        dirpath = Path(self.tempdirs.head)
         self._set_filecount(dirpath.count_images())
 
         swaps = []
 
         for path in dirpath.glob("*"):
-            outpath = f"{OUT_TMP}/{get_basename(path)}.jpg"
+            outpath = f"{self.tempdirs.out}/{get_basename(path)}.jpg"
             swaps.append([path, face, outpath])
 
         self._multiswap(swaps)
 
-        numberize_files(OUT_TMP)
-        combineframes(OUT_TMP, out)
+        numberize_files(self.tempdirs.out)
+        combineframes(self.tempdirs.out, out)
 
         if not self.keep_temp:
-            [shutil.rmtree(p) for p in IMG_TO_VIDEO]
+            [shutil.rmtree(p) for p in self.tempdirs.img_to_video]
 
     def swap_video_to_video(self, head, face, out):
-        [force_mkdir(p) for p in VIDEO_TO_VIDEO]
-        extractframes(head, HEAD_TMP)
-        extractframes(face, FACE_TMP)
-        extractaudio(face, AUDIO_TMP)
+        [force_mkdir(p) for p in self.tempdirs.video_to_video]
+        extractframes(head, self.tempdirs.head)
+        extractframes(face, self.tempdirs.face)
+        extractaudio(face, self.tempdirs.audio)
 
-        heads = sorted(glob(f"{HEAD_TMP}/*"))
-        faces = sorted(glob(f"{FACE_TMP}/*"))
+        heads = sorted(glob(f"{self.tempdirs.head}/*"))
+        faces = sorted(glob(f"{self.tempdirs.face}/*"))
 
         if len(heads) != len(faces):
             logging.warning("Not the same amount of files in heads and faces")
@@ -213,7 +225,7 @@ class Swapper:
         swaps = []
 
         for index, path in enumerate(heads):
-            outpath = f"{OUT_TMP}/{get_basename(path)}.jpg"
+            outpath = f"{self.tempdirs.out}/{get_basename(path)}.jpg"
 
             # Check if there is face, and if not, abort mission
             if index > len(faces) - 1:
@@ -225,21 +237,21 @@ class Swapper:
 
         self._multiswap(swaps)
 
-        numberize_files(OUT_TMP)
+        numberize_files(self.tempdirs.out)
 
         if not self.swap_audio:
-            combineframes(OUT_TMP, out)
+            combineframes(self.tempdirs.out, out)
         else:
-            TMP_VIDEO = str(Path(OUT_TMP) / "_silent.mp4")
+            TMP_VIDEO = str(Path(self.tempdirs.out) / "_silent.mp4")
 
             # TODO: make a function out of this
             if self.audio_input:
                 audio_file = args.audio_input
             else:
-                audio_file = f"{AUDIO_TMP}/{TEMP_AUDIO_FILENAME}"
+                audio_file = f"{self.tempdirs.audio}/{TEMP_AUDIO_FILENAME}"
 
-            combineframes(OUT_TMP, TMP_VIDEO)
+            combineframes(self.tempdirs.out, TMP_VIDEO)
             combineaudio(TMP_VIDEO, audio_file, out)
 
         if not self.keep_temp:
-            [shutil.rmtree(p) for p in VIDEO_TO_VIDEO]
+            [shutil.rmtree(p) for p in self.tempdirs.video_to_video]

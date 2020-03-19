@@ -161,6 +161,9 @@ def get_parser():
     parser.add_argument("-sr", "--swap-order-repeat", action = "store_true", default = False,
         help = "When using --swap-order and there are not enough target faces, repeat the sequence"
     )
+    parser.add_argument("--temp-dir", type = str,
+        help = "Define the directory where temporary files should be placed"
+    )
     parser.add_argument("-v", "--verbose", action = "store_true",
         help = "Show debug information"
     )
@@ -541,7 +544,8 @@ def main(args):
             swap_order_repeat = args.swap_order_repeat,
             ignore_nofaces = args.ignore_nofaces,
             concurrent = not args.no_threading,
-            colour_correct = not args.no_colour_correct
+            colour_correct = not args.no_colour_correct,
+            temp_dir = args.temp_dir
         )
 
         # Directory of faces to directory of heads
