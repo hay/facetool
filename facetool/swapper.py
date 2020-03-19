@@ -11,11 +11,11 @@ from .errors import TooManyFacesError, NoFacesError, FaceError
 
 logger = logging.getLogger(__name__)
 
-DIR_PREFIX = random_filename()
-AUDIO_TMP = f"audio-tmp-{DIR_PREFIX}"
-HEAD_TMP = f"head-tmp-{DIR_PREFIX}"
-FACE_TMP = f"face-tmp-{DIR_PREFIX}"
-OUT_TMP = f"out-tmp-{DIR_PREFIX}"
+DIR_SUFFIX = random_filename()
+AUDIO_TMP = f"audio-tmp-{DIR_SUFFIX}"
+HEAD_TMP = f"head-tmp-{DIR_SUFFIX}"
+FACE_TMP = f"face-tmp-{DIR_SUFFIX}"
+OUT_TMP = f"out-tmp-{DIR_SUFFIX}"
 
 IMG_TO_VIDEO = (HEAD_TMP, OUT_TMP)
 VIDEO_TO_VIDEO = (HEAD_TMP, OUT_TMP, FACE_TMP, AUDIO_TMP)
