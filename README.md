@@ -30,7 +30,7 @@ Then run either
 
 Or
 
-    pip3 install dlib numpy opencv-python ffmpeg-python scikit-image tqdm imutils tensorflow pandas face-recognition
+    pip3 install dlib numpy opencv-python ffmpeg-python scikit-image tqdm imutils tensorflow pandas face-recognition dataknead sklearn
 
 This can easily take an hour, so don't worry if it takes a while! After installing the libraries (either with or without `poetry`) try running the script by typing `./facetool.py`.
 
