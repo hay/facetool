@@ -15,35 +15,49 @@ Some things `facetool` can do:
 * Extracting and combining frames from and to videos
 
 ## Installation
-In theory, this tool should work on any system that can run the required libraries (`dlib`, `opencv` and a couple of other ones), but in practice i've only tested it on MacOS.
+In theory, this tool should work on any system that can run the required libraries (`dlib`, `opencv` and a couple of other ones). In practice i've only tested on macOS 10.14 and Ubuntu Linux.
+
+### General instructions
+I highly recommend using [`poetry`](https://python-poetry.org/docs/) for installing the dependencies. You'll also need a working version of Python 3.6 or higher.
+
+Clone the repo
+
+  git clone https://github.com/hay/facetool
+
+Then run either
+
+  poetry install
+
+Or
+
+  pip3 install dlib numpy opencv-python ffmpeg-python scikit-image tqdm imutils tensorflow pandas face-recognition
+
+This can easily take an hour, so don't worry if it takes a while! After installing the libraries (either with or without `poetry`) try running the script by typing `./facetool.py`.
+
+If that all works you can try some of examples.
+
+### Ubuntu Linux (18.04)
+If you're having problems running `poetry` you might need to symlink `python3` to `python`
+
+  sudo /usr/bin/python3 /usr/bin/python
+
+You might need a couple of dependencies
+
+  apt-get install python3-venv python3-dev cmake make build-essential libsm6 libxrender-dev ffmpeg
+
+If you're getting
+
+  ModuleNotFoundError: No module named 'distutils.util'
+
+When using `poetry` try
+
+  sudo apt-get install python3-distutils --reinstall
 
 ### macOS
-I highly recommend using [`brew`](https://brew.sh/) to install all dependencies. You'll also need a working version of Python 3.6 or higher.
-
-You can either use [`poetry`](https://poetry.eustace.io/) or install the required libraries globally using `pip`.
-
-Given that you have Python 3.6 on your system this should be enough:
-
-Clone this repository:
-```bash
-    git clone https://github.com/hay/facetool.git
-```
-Install dependencies using `brew`:
+Install the dependencies using `brew`:
 ```bash
     brew install cmake ffmpeg
 ```
-
-*When using `poetry` (recommended)*
-
-Run `poetry install` in the root folder of tthe checked out folder. This might take a while! Then run `poetry shell`.
-
-*When using globally installed libraries*
-
-`pip3 install dlib numpy opencv-python ffmpeg-python scikit-image tqdm imutils tensorflow pandas face-recognition`
-
-After installing the libraries (either with or without `poetry`) try running the script by typing `./facetool.py`.
-
-If that all works you can try some of the commands below.
 
 ## Examples
 
