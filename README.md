@@ -22,15 +22,15 @@ I highly recommend using [`poetry`](https://python-poetry.org/docs/) for install
 
 Clone the repo
 
-  git clone https://github.com/hay/facetool
+    git clone https://github.com/hay/facetool
 
 Then run either
 
-  poetry install
+    poetry install
 
 Or
 
-  pip3 install dlib numpy opencv-python ffmpeg-python scikit-image tqdm imutils tensorflow pandas face-recognition
+    pip3 install dlib numpy opencv-python ffmpeg-python scikit-image tqdm imutils tensorflow pandas face-recognition
 
 This can easily take an hour, so don't worry if it takes a while! After installing the libraries (either with or without `poetry`) try running the script by typing `./facetool.py`.
 
@@ -39,19 +39,19 @@ If that all works you can try some of examples.
 ### Ubuntu Linux (18.04)
 If you're having problems running `poetry` you might need to symlink `python3` to `python`
 
-  sudo /usr/bin/python3 /usr/bin/python
+    sudo /usr/bin/python3 /usr/bin/python
 
 You might need a couple of dependencies
 
-  apt-get install python3-venv python3-dev cmake make build-essential libsm6 libxrender-dev ffmpeg
+    apt-get install python3-venv python3-dev cmake make build-essential libsm6 libxrender-dev ffmpeg
 
 If you're getting
 
-  ModuleNotFoundError: No module named 'distutils.util'
+    ModuleNotFoundError: No module named 'distutils.util'
 
 When using `poetry` try
 
-  sudo apt-get install python3-distutils --reinstall
+    sudo apt-get install python3-distutils --reinstall
 
 ### macOS
 Install the dependencies using `brew`:
