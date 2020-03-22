@@ -39,7 +39,7 @@ If that all works you can try some of examples.
 ### Ubuntu Linux (18.04)
 If you're having problems running `poetry` you might need to symlink `python3` to `python`
 
-    sudo /usr/bin/python3 /usr/bin/python
+    sudo ln -s /usr/bin/python3 /usr/bin/python
 
 You might need a couple of dependencies
 
