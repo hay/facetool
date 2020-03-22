@@ -223,7 +223,6 @@ Return metadata about an image or video file in JSON format
 ## Troubleshooting
 * Before opening an issue, try running your command with the `-v` (verbose) switch, because this will give you more debug information. When using `-vv` (extra verbose) `facetool` will abort the program on exceptions.
 * Note that, by default, facetool doesn't stop at errors.
-* Documentation might be a bit lacking at times. I try to at least provide one image for every command line switch and option.
 
 ## All options
 You'll get this output when running `facetool.py -h`.
@@ -231,13 +230,14 @@ You'll get this output when running `facetool.py -h`.
 ```bash
 usage: facetool [-h] -i INPUT [-o OUTPUT] [-t TARGET] [-ai AUDIO_INPUT]
                 [--as-percentage] [-bl BLUR] [-dd DATA_DIRECTORY] [-f]
-                [-fr FRAMERATE] [-fa FEATHER] [-ih IMAGE_HEIGHT]
-                [-iw IMAGE_WIDTH] [-kt] [-m MODEL] [--no-audio]
-                [--no-eyesbrows] [--no-nosemouth] [--only-mouth]
-                [-of {default,csv,json}] [-pp PREDICTOR_PATH] [--profile] [-q]
-                [-s] [--save-originals] [--save-warped]
+                [-fr FRAMERATE] [-fa FEATHER] [-if] [-ih IMAGE_HEIGHT]
+                [-iw IMAGE_WIDTH] [-kt] [-m MODEL] [--no-audio] [-nocc]
+                [--no-eyesbrows] [--no-nosemouth] [--no-threading]
+                [--only-mouth] [-of {default,csv,json}] [-pp PREDICTOR_PATH]
+                [--profile] [-q] [-s] [--save-originals] [--save-warped]
                 [--swap-method {faceswap,faceswap3d}] [-so SWAP_ORDER]
-                [-sp SAMPLE_PERCENTAGE] [-sr] [-v] [-vv] [--warp-3d]
+                [-sp SAMPLE_PERCENTAGE] [-sr] [--temp-dir TEMP_DIR] [-v] [-vv]
+                [--warp-3d]
                 [{average,classify,cluster,combineaudio,combineframes,count,distance,crop,encode,extractframes,landmarks,locate,pose,probe,sample,swap}]
 
 Manipulate faces in videos and images
@@ -264,6 +264,9 @@ optional arguments:
   -fr FRAMERATE, --framerate FRAMERATE
   -fa FEATHER, --feather FEATHER
                         Softness of edges on a swapped face
+  -if, --ignore-nofaces
+                        When having no faces to swap, keep the original input
+                        image
   -ih IMAGE_HEIGHT, --image-height IMAGE_HEIGHT
                         Height of output image / height
   -iw IMAGE_WIDTH, --image-width IMAGE_WIDTH
@@ -272,8 +275,11 @@ optional arguments:
   -m MODEL, --model MODEL
                         Use a precalculated model (for calculating distances)
   --no-audio
+  -nocc, --no-colour-correct
+                        Don't colour correct
   --no-eyesbrows
   --no-nosemouth
+  --no-threading        Don't use multithreading
   --only-mouth
   -of {default,csv,json}, --output-format {default,csv,json}
                         Specify output format
@@ -295,17 +301,19 @@ optional arguments:
   -sr, --swap-order-repeat
                         When using --swap-order and there are not enough
                         target faces, repeat the sequence
+  --temp-dir TEMP_DIR   Define the directory where temporary files should be
+                        placed
   -v, --verbose         Show debug information
   -vv, --extra-verbose  Show debug information AND raise / abort on exceptions
   --warp-3d             Swap faces and morph to coordinates of target face
 ```
 
-## Limitations
+## Limitations / TODO
 * More advanced swapping methods like 'deepfake' are not supported.
 * Even though you could use the library in your own scripts (instead of using the command line utility), this isn't very well supported yet.
-* No multithreading / processor support.
-<s>* Face swapping is limited to one face.</s>
-<s>* Operations on videos will remove the audio.</s>
+* <s>No multithreading / processor support.</s>
+* <s>Face swapping is limited to one face.</s>
+* <s>Operations on videos will remove the audio.</s>
 
 ## Testing
 `facetool` doesn't have a proper test suite yet, but you could try running `test-all.py` in the `test` directory to try a couple of common examples.
